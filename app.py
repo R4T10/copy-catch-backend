@@ -1,16 +1,17 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from pymongo import MongoClient
+from flask_pymongo import PyMongo
 import io
 import zipfile
 
 app = Flask(__name__)
 CORS(app, resources={r'/*': {'origins': '*'}})
 
-client = MongoClient('localhost', 27017)
+app.config["MONGO_URI"] = "mongodb://localhost:27017/Copy-Catch"
+mongo = PyMongo(app)
+db = mongo.db
 
-db = client.flask_db
-todos = db.todos
+
 
 @app.route('/upload', methods=['POST'])
 def upload():
