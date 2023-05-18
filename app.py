@@ -45,8 +45,8 @@ def upload():
                                                                       'question starts.', '')
                                 text_response = text_response.strip()
                                 if text_response == '':
-                                    text_response = '-'
-                            text_response = re.sub(r"[^a-zA-Z0-9 ]", "", text_response)
+                                    text_response = 'null'
+                            text_response = re.sub(r'[^a-zA-Z0-9 ]', '', text_response)
                             if folder_name not in text_responses:
                                 text_responses[folder_name] = {'students': {}}
                             text_responses[folder_name]['students'][keeps] = text_response
