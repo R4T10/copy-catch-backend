@@ -18,6 +18,7 @@ import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from scipy import sparse
 import pickle
+from spellchecker import SpellChecker
 
 app = Flask(__name__)
 CORS(app, resources={r'/*': {'origins': '*'}})
@@ -25,6 +26,32 @@ CORS(app, resources={r'/*': {'origins': '*'}})
 app.config["MONGO_URI"] = "mongodb://localhost:27017/Copy-Catch"
 mongo = PyMongo(app)
 db = mongo.db
+
+spellchecker = SpellChecker(language='en')
+
+# Path to the coding_words.txt file
+coding_words_file = 'coding_words.txt'
+
+# Open the coding_words.txt file
+with open(coding_words_file, 'r') as file:
+    # Read the file line by line
+    for line in file:
+        # Remove leading/trailing whitespaces and newline characters
+        word = line.strip()
+
+        # Add the word to the spellchecker's internal dictionary
+        spellchecker.word_frequency.load_words([word])
+
+
+def perform_spell_correction(text):
+    corrected_text = []
+    words = text.split()
+    for word in words:
+        corrected_word = spellchecker.correction(word)
+        corrected_text.append(corrected_word)
+    spell_corr = list(filter(None, corrected_text))
+    return ' '.join(spell_corr)
+
 
 @app.route('/upload', methods=['POST'])
 def upload():
@@ -58,7 +85,7 @@ def upload():
                             # spell_corr = [spell.correction(w) for w in text_response.split()]
                             # spell_corr = list(filter(None, spell_corr))
                             # text_response = ' '.join(spell_corr)
-
+                            text_response = perform_spell_correction(text_response)
                             question = Question(course_id=3, question=folder_names, student_name=student_name,
                                                 student_id=student_id, answer=text_response)
                             question_dict = question.to_dict()
@@ -109,37 +136,37 @@ def upload():
 
 @app.route('/get_data', methods=['GET'])
 def get_data():
-    data = db.Question.find({'course_id': 3})
-    df = pd.DataFrame(data, columns=['_id', 'course_id', 'question', 'student_id', 'student_name', 'answer'])
-
-    question = df['question']
-    list_q = list(set(question))
-    list_q = sorted(list_q, key=lambda x: int(x.split('-')[0][1:]))
-    # print(list_q)
-
-    for check in list_q:
-        keep = df[df['question'] == check]
-        # print(check)
-        df_question = pd.DataFrame(data=keep)
-        # print(df_question.iloc[:,4:6])
-        keep_id = keep['student_id']
-        keep_id = sorted(keep_id, key=lambda x: (int(x[:2]), int(x[2:])))
-        # print(keep_id)
-        for student_id in keep_id:
-            print(check)
-            data_for_id = df_question[df_question['student_id'] == student_id]
-            answer = data_for_id['answer'].iloc[0]
-            print(answer)
-
-            test = BM25()
-            test.fit(df_question['answer'])
-            score = test.transform(answer)
-            df_bm = pd.DataFrame(data=df_question)
-            df_bm['bm25'] = list(score)
-            df_bm['rank'] = df_bm['bm25'].rank(ascending=False)
-            df_bm = df_bm.nlargest(columns='bm25', n=3)
-            print(df_bm.iloc[:, 4:7])
-            keep = df_bm.to_dict('records')
+    # data = db.Question.find({'course_id': 3})
+    # df = pd.DataFrame(data, columns=['_id', 'course_id', 'question', 'student_id', 'student_name', 'answer'])
+    #
+    # question = df['question']
+    # list_q = list(set(question))
+    # list_q = sorted(list_q, key=lambda x: int(x.split('-')[0][1:]))
+    # # print(list_q)
+    #
+    # for check in list_q:
+    #     keep = df[df['question'] == check]
+    #     # print(check)
+    #     df_question = pd.DataFrame(data=keep)
+    #     # print(df_question.iloc[:,4:6])
+    #     keep_id = keep['student_id']
+    #     keep_id = sorted(keep_id, key=lambda x: (int(x[:2]), int(x[2:])))
+    #     # print(keep_id)
+    #     for student_id in keep_id:
+    #         print(check)
+    #         data_for_id = df_question[df_question['student_id'] == student_id]
+    #         answer = data_for_id['answer'].iloc[0]
+    #         print(answer)
+    #
+    #         test = BM25()
+    #         test.fit(df_question['answer'])
+    #         score = test.transform(answer)
+    #         df_bm = pd.DataFrame(data=df_question)
+    #         df_bm['bm25'] = list(score)
+    #         df_bm['rank'] = df_bm['bm25'].rank(ascending=False)
+    #         df_bm = df_bm.nlargest(columns='bm25', n=3)
+    #         print(df_bm.iloc[:, 4:7])
+    #         keep = df_bm.to_dict('records')
 
     #     print(check)
     #     # print(keep)
