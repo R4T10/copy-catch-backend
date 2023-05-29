@@ -12,7 +12,6 @@ import json
 import re
 import pandas as pd
 from models.question import Question
-from spellchecker import SpellChecker
 import pickle
 
 import numpy as np
@@ -26,20 +25,6 @@ CORS(app, resources={r'/*': {'origins': '*'}})
 app.config["MONGO_URI"] = "mongodb://localhost:27017/Copy-Catch"
 mongo = PyMongo(app)
 db = mongo.db
-
-spell = SpellChecker(language='en')
-
-
-def perform_spell_correction(text):
-    spell = SpellChecker(language='en')
-    corrected_text = []
-    words = text.split()
-    for word in words:
-        corrected_word = spell.correction(word)
-        corrected_text.append(corrected_word)
-    spell_corr = list(filter(None, corrected_text))
-    return ' '.join(spell_corr)
-
 
 @app.route('/upload', methods=['POST'])
 def upload():
@@ -73,7 +58,6 @@ def upload():
                             # spell_corr = [spell.correction(w) for w in text_response.split()]
                             # spell_corr = list(filter(None, spell_corr))
                             # text_response = ' '.join(spell_corr)
-                            text_response = perform_spell_correction(text_response)
 
                             question = Question(course_id=3, question=folder_names, student_name=student_name,
                                                 student_id=student_id, answer=text_response)
