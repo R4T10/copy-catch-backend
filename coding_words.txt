@@ -83,6 +83,7 @@ DNS
 doctype
 document
 DOM
+Dagster
 download
 driver
 dynamic
@@ -158,6 +159,7 @@ lambda
 library
 link
 linker
+lib
 list
 localhost
 logic
@@ -178,6 +180,7 @@ navigation
 network
 node
 node.js
+js
 null
 object
 OOP
@@ -233,6 +236,7 @@ string
 stream
 syntax
 table
+src
 TCP
 testing
 thread
@@ -244,12 +248,16 @@ type
 UDP
 UI
 URL
+usr
 UTF-8
 validation
 variable
 vector
 version control
 virtual
+VMs
+vm
+vms
 web development
 web server
 while loop

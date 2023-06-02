@@ -80,11 +80,11 @@ def upload():
                                 text_response = text_response.strip()
                                 if text_response == '':
                                     text_response = 'null'
+                            if "'s" in text_response:
+                                text_response = text_response.replace("'s", '')
+                            if "don't" in text_response:
+                                text_response = text_response.replace("don't", 'do not')
                             text_response = re.sub(r'[^a-zA-Z0-9 ]', ' ', text_response)
-
-                            # spell_corr = [spell.correction(w) for w in text_response.split()]
-                            # spell_corr = list(filter(None, spell_corr))
-                            # text_response = ' '.join(spell_corr)
                             text_response = perform_spell_correction(text_response)
                             question = Question(course_id=3, question=folder_names, student_name=student_name,
                                                 student_id=student_id, answer=text_response)
@@ -136,37 +136,37 @@ def upload():
 
 @app.route('/get_data', methods=['GET'])
 def get_data():
-    # data = db.Question.find({'course_id': 3})
-    # df = pd.DataFrame(data, columns=['_id', 'course_id', 'question', 'student_id', 'student_name', 'answer'])
-    #
-    # question = df['question']
-    # list_q = list(set(question))
-    # list_q = sorted(list_q, key=lambda x: int(x.split('-')[0][1:]))
-    # # print(list_q)
-    #
-    # for check in list_q:
-    #     keep = df[df['question'] == check]
-    #     # print(check)
-    #     df_question = pd.DataFrame(data=keep)
-    #     # print(df_question.iloc[:,4:6])
-    #     keep_id = keep['student_id']
-    #     keep_id = sorted(keep_id, key=lambda x: (int(x[:2]), int(x[2:])))
-    #     # print(keep_id)
-    #     for student_id in keep_id:
-    #         print(check)
-    #         data_for_id = df_question[df_question['student_id'] == student_id]
-    #         answer = data_for_id['answer'].iloc[0]
-    #         print(answer)
-    #
-    #         test = BM25()
-    #         test.fit(df_question['answer'])
-    #         score = test.transform(answer)
-    #         df_bm = pd.DataFrame(data=df_question)
-    #         df_bm['bm25'] = list(score)
-    #         df_bm['rank'] = df_bm['bm25'].rank(ascending=False)
-    #         df_bm = df_bm.nlargest(columns='bm25', n=3)
-    #         print(df_bm.iloc[:, 4:7])
-    #         keep = df_bm.to_dict('records')
+    data = db.Question.find({'course_id': 3})
+    df = pd.DataFrame(data, columns=['_id', 'course_id', 'question', 'student_id', 'student_name', 'answer'])
+
+    question = df['question']
+    list_q = list(set(question))
+    list_q = sorted(list_q, key=lambda x: int(x.split('-')[0][1:]))
+    # print(list_q)
+
+    for check in list_q:
+        keep = df[df['question'] == check]
+        # print(check)
+        df_question = pd.DataFrame(data=keep)
+        # print(df_question.iloc[:,4:6])
+        keep_id = keep['student_id']
+        keep_id = sorted(keep_id, key=lambda x: (int(x[:2]), int(x[2:])))
+        # print(keep_id)
+        for student_id in keep_id:
+            print(check)
+            data_for_id = df_question[df_question['student_id'] == student_id]
+            answer = data_for_id['answer'].iloc[0]
+            print(answer)
+
+            test = BM25()
+            test.fit(df_question['answer'])
+            score = test.transform(answer)
+            df_bm = pd.DataFrame(data=df_question)
+            df_bm['bm25'] = list(score)
+            df_bm['rank'] = df_bm['bm25'].rank(ascending=False)
+            df_bm = df_bm.nlargest(columns='bm25', n=3)
+            print(df_bm.iloc[:, 4:7])
+            keep = df_bm.to_dict('records')
 
     #     print(check)
     #     # print(keep)
