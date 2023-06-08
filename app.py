@@ -131,7 +131,7 @@ def upload():
 
         return 'Successfully upload the files'
     else:
-        return 'Invalid file type. Only x-zip-compressed files are allowed.'
+        return 'Invalid file type. Only zip file are allowed.'
 
 
 @app.route('/get_data', methods=['GET'])
