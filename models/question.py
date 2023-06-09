@@ -1,10 +1,16 @@
 class Question:
-    def __init__(self, course_id, all_question):
+    def __init__(self, course_id, question, student_id,student_name, answer):
         self.course_id = course_id
-        self.all_question = all_question
+        self.question = question
+        self.student_id = student_id
+        self.student_name = student_name
+        self.answer = answer
 
     def to_dict(self):
         return {
             'course_id': self.course_id,
-            'all_question': self.all_question
+            'question': self.question,
+            'student_id': self.student_id,
+            'student_name':self.student_name,
+            'answer': self.answer
         }
