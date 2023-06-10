@@ -1,21 +1,14 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_pymongo import PyMongo
-from bson.json_util import dumps
-from nltk import PorterStemmer, word_tokenize
-from nltk.corpus import stopwords
 import io
 import zipfile
 import json
 import re
 import pandas as pd
 from models.question import Question
-import pickle
 from BM25 import BM25
-import numpy as np
-from sklearn.feature_extraction.text import TfidfVectorizer
-from scipy import sparse
-import pickle
+
 from spellchecker import SpellChecker
 
 app = Flask(__name__)
