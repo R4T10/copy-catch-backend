@@ -148,13 +148,17 @@ integer
 integration
 interface
 interpreter
+img
 iteration
 Java
+jpg
 JavaScript
 JDBC
 JIT
 JSON
+Jira
 keyword
+KMS
 lambda
 library
 link
@@ -207,6 +211,7 @@ protocol
 proxy
 query
 queue
+qTest
 RAD
 recursion
 redirect

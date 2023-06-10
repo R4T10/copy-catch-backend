@@ -103,20 +103,27 @@ def get_data():
         keep_id = keep['student_id']
         keep_id = sorted(keep_id, key=lambda x: (int(x[:2]), int(x[2:])))
         for student_id in keep_id:
-            print(check)
             data_for_id = df_question[df_question['student_id'] == student_id]
             answer = data_for_id['answer'].iloc[0]
-            print(answer)
+            if answer != 'null':
 
-            test = BM25()
-            test.fit(df_question['answer'])
-            score = test.transform(answer)
-            df_bm = pd.DataFrame(data=df_question)
-            df_bm['bm25'] = list(score)
-            df_bm['rank'] = df_bm['bm25'].rank(ascending=False)
-            df_bm = df_bm.nlargest(columns='bm25', n=3)
-            print(df_bm.iloc[:, 4:7])
-            keep = df_bm.to_dict('records')
+                test = BM25()
+                test.fit(df_question['answer'])
+                score = test.transform(answer)
+                df_bm = pd.DataFrame(data=df_question)
+                df_bm['bm25'] = list(score)
+                df_bm['rank'] = df_bm['bm25'].rank(ascending=False)
+                df_bm = df_bm.nlargest(columns='bm25', n=3)
+                percentage = round((df_bm['bm25'].iloc[1] / df_bm['bm25'].iloc[0]) * 100, 2)
+                print(df_bm)
+                if percentage >= 50:
+                    print(student_id)
+                    print(check)
+                    print(answer)
+                    print(percentage)
+            # print(df_bm.iloc[:, 4:7])
+            # keep = df_bm.to_dict('records')
+            # print(keep)
 
     #     print(check)
     #     # print(keep)
