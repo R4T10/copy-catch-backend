@@ -90,7 +90,7 @@ def upload():
 
 @app.route('/get_data', methods=['GET'])
 def get_data():
-    global keep_id
+    global keep_id, sorted_data_return
     data_return = {}
     data = db.Question.find({'course_id': 3})
     df = pd.DataFrame(data, columns=['_id', 'course_id', 'question', 'student_id', 'student_name', 'answer'])
@@ -138,8 +138,13 @@ def get_data():
                     percentage = 0
                 data_return[question].append(percentage)
             print(data_return)
+    response_data = {
+        'student_id': keep_id,
+        'question': list_q,
+        'percentage': data_return
+    }
 
-    return jsonify({'student_id': keep_id}, {'question': list_q}, {'percentage': data_return}), 200
+    return jsonify(response_data), 200
 
 
 if __name__ == '__main__':
