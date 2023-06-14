@@ -82,10 +82,10 @@ def upload():
                             question_dict = question.to_dict()
                             db.Question.insert_one(question_dict)
                     else:
-                        return 501
-        return 200
+                        return jsonify({'message': 'Invalid format'}), 400
+        return jsonify({'message': 'Upload successful'}), 200
     else:
-        return 501
+        return jsonify({'message': 'Invalid type file'}), 400
 
 
 @app.route('/get_data', methods=['GET'])
