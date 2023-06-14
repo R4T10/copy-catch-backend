@@ -82,14 +82,16 @@ def upload():
                             question_dict = question.to_dict()
                             db.Question.insert_one(question_dict)
                     else:
-                        return 'This file is not in the right format'
-        return 'Successfully upload the files'
+                        return 501
+        return 200
     else:
-        return 'Invalid file type. Only zip file are allowed.'
+        return 501
 
 
 @app.route('/get_data', methods=['GET'])
 def get_data():
+    global keep_id
+    data_return = {}
     data = db.Question.find({'course_id': 3})
     df = pd.DataFrame(data, columns=['_id', 'course_id', 'question', 'student_id', 'student_name', 'answer'])
 
@@ -97,8 +99,8 @@ def get_data():
     list_q = list(set(question))
     list_q = sorted(list_q, key=lambda x: int(x.split('-')[0][1:]))
 
-    for check in list_q:
-        keep = df[df['question'] == check]
+    for question in list_q:
+        keep = df[df['question'] == question]
         df_question = pd.DataFrame(data=keep)
         keep_id = keep['student_id']
         keep_id = sorted(keep_id, key=lambda x: (int(x[:2]), int(x[2:])))
@@ -106,7 +108,6 @@ def get_data():
             data_for_id = df_question[df_question['student_id'] == student_id]
             answer = data_for_id['answer'].iloc[0]
             if answer != 'null':
-
                 test = BM25()
                 test.fit(df_question['answer'])
                 score = test.transform(answer)
@@ -115,23 +116,30 @@ def get_data():
                 df_bm['rank'] = df_bm['bm25'].rank(ascending=False)
                 df_bm = df_bm.nlargest(columns='bm25', n=3)
                 percentage = round((df_bm['bm25'].iloc[1] / df_bm['bm25'].iloc[0]) * 100, 2)
-                print(df_bm)
-                if percentage >= 50:
-                    print(student_id)
-                    print(check)
-                    print(answer)
-                    print(percentage)
-            # print(df_bm.iloc[:, 4:7])
-            # keep = df_bm.to_dict('records')
-            # print(keep)
+                # print(check)
+                # print(df_bm.iloc[:, 3:7])
+                # if percentage >= 50:
+                #     print(student_id)
+                #     print(question)
+                #     print(answer)
+                #     print(percentage)
+                # else:
+                #     percentage = 0
+                #     print(student_id)
+                #     print(question)
+                #     print(answer)
+                #     print(percentage)
+                #     if check not in data_dict:
+                #         data_dict[check] = []  # Initialize an empty list for a new question ID
+                #     data_dict[check].append(percentage)
+                if question not in data_return:
+                    data_return[question] = []  # Initialize an empty list for a new question ID
+                if percentage < 50:
+                    percentage = 0
+                data_return[question].append(percentage)
+            print(data_return)
 
-    #     print(check)
-    #     # print(keep)
-    #     print(keep_id)
-    #     keep_id = sorted(keep_id, key=lambda x: (int(x[:2]), int(x[2:])))
-    #     for answer_c in keep_id:
-
-    return 'se'
+    return jsonify({'student_id': keep_id}, {'question': list_q}, {'percentage': data_return}), 200
 
 
 if __name__ == '__main__':
