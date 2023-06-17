@@ -8,6 +8,7 @@ import re
 import pandas as pd
 from models.question import Question
 from BM25 import BM25
+from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 
 from spellchecker import SpellChecker
 
@@ -86,7 +87,7 @@ def upload():
 
 @app.route('/get_data', methods=['GET'])
 def get_data():
-    global keep_id, sorted_data_return
+    global keep_id, sorted_data_return, new_dict
     data_return = {}
     data = db.Question.find({'course_id': 3})
     df = pd.DataFrame(data, columns=['_id', 'course_id', 'question', 'student_id', 'student_name', 'answer'])
@@ -104,14 +105,22 @@ def get_data():
             data_for_id = df_question[df_question['student_id'] == student_id]
             answer = data_for_id['answer'].iloc[0]
             if answer != 'null':
-                test = BM25()
-                test.fit(df_question['answer'])
-                score = test.transform(answer)
-                df_bm = pd.DataFrame(data=df_question)
-                df_bm['bm25'] = list(score)
-                df_bm['rank'] = df_bm['bm25'].rank(ascending=False)
-                df_bm = df_bm.nlargest(columns='bm25', n=3)
-                percentage = round((df_bm['bm25'].iloc[1] / df_bm['bm25'].iloc[0]) * 100, 2)
+                vectorizer = TfidfVectorizer()
+                tfidf_matrix = vectorizer.fit_transform([answer])
+                scores = vectorizer.transform([answer])
+                df_tfidf = pd.DataFrame(data=df_question)
+                df_tfidf['tfidf'] = list(scores.toarray()[0])
+                df_tfidf['rank'] = df_tfidf['tfidf'].rank(ascending=False)
+                df_tfidf = df_tfidf.nlargest(columns='tfidf', n=3)
+                percentage = round((df_tfidf['tfidf'].iloc[1] / df_tfidf['tfidf'].iloc[0]) * 100, 2)
+                # test = BM25()
+                # test.fit(df_question['answer'])
+                # score = test.transform(answer)
+                # df_bm = pd.DataFrame(data=df_question)
+                # df_bm['bm25'] = list(score)
+                # df_bm['rank'] = df_bm['bm25'].rank(ascending=False)
+                # df_bm = df_bm.nlargest(columns='bm25', n=3)
+                # percentage = round((df_bm['bm25'].iloc[1] / df_bm['bm25'].iloc[0]) * 100, 2)
                 # print(check)
                 # print(df_bm.iloc[:, 3:7])
                 # if percentage >= 50:
@@ -133,14 +142,16 @@ def get_data():
                 if percentage < 50:
                     percentage = 0
                 data_return[question].append(percentage)
-            print(data_return)
+            sorted_data_return = dict(sorted(data_return.items(), key=lambda x: int(x[0].split('Q')[1].split('-')[0])))
+            # print(new_dict)
     response_data = {
         'student_id': keep_id,
         'question': list_q,
-        'percentage': data_return
+        'percentage': sorted_data_return
     }
 
-    return jsonify(response_data), 200
+    return response_data, 200
+    # return 'SE'
 
 
 if __name__ == '__main__':
