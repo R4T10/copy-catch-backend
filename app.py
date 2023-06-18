@@ -88,39 +88,48 @@ def upload():
 @app.route('/get_data', methods=['GET'])
 def get_data():
     global keep_id, sorted_data_return, new_dict
-    data_return = {}
     data = db.Question.find({'course_id': 3})
     df = pd.DataFrame(data, columns=['_id', 'course_id', 'question', 'student_id', 'student_name', 'answer'])
 
     question = df['question']
     list_q = list(set(question))
     list_q = sorted(list_q, key=lambda x: int(x.split('-')[0][1:]))
-
+    temp = {}
     for question in list_q:
         keep = df[df['question'] == question]
         df_question = pd.DataFrame(data=keep)
+        # print(df_question)
         keep_id = keep['student_id']
         keep_id = sorted(keep_id, key=lambda x: (int(x[:2]), int(x[2:])))
+        # print(keep_id)
+        # print(question)
         for student_id in keep_id:
             data_for_id = df_question[df_question['student_id'] == student_id]
+            # print(data_for_id)
+            # print(student_id)
             answer = data_for_id['answer'].iloc[0]
+            # print(answer)
             if answer != 'null':
-                vectorizer = TfidfVectorizer()
-                tfidf_matrix = vectorizer.fit_transform([answer])
-                scores = vectorizer.transform([answer])
-                df_tfidf = pd.DataFrame(data=df_question)
-                df_tfidf['tfidf'] = list(scores.toarray()[0])
-                df_tfidf['rank'] = df_tfidf['tfidf'].rank(ascending=False)
-                df_tfidf = df_tfidf.nlargest(columns='tfidf', n=3)
-                percentage = round((df_tfidf['tfidf'].iloc[1] / df_tfidf['tfidf'].iloc[0]) * 100, 2)
-                # test = BM25()
-                # test.fit(df_question['answer'])
-                # score = test.transform(answer)
-                # df_bm = pd.DataFrame(data=df_question)
-                # df_bm['bm25'] = list(score)
-                # df_bm['rank'] = df_bm['bm25'].rank(ascending=False)
-                # df_bm = df_bm.nlargest(columns='bm25', n=3)
-                # percentage = round((df_bm['bm25'].iloc[1] / df_bm['bm25'].iloc[0]) * 100, 2)
+                # vectorizer = TfidfVectorizer()
+                # vectorizer.fit_transform(df_question['answer'])
+                # print(student_id)
+                # score = vectorizer.transform([answer])
+                # df_tfidf = pd.DataFrame(data=df_question)
+                # print(score.data)
+                # df_tfidf['tfidf'] = scores.data
+                # df_tfidf['rank'] = df_tfidf['tfidf'].rank(ascending=False)
+                # df_tfidf = df_tfidf.nlargest(columns='tfidf', n=3)
+                # print(df_tfidf)
+                # percentage = round((df_tfidf['tfidf'].iloc[1] / df_tfidf['tfidf'].iloc[0]) * 100, 2)
+                # print(df_tfidf)
+                test = BM25()
+                test.fit(df_question['answer'])
+                score = test.transform(answer)
+                df_bm = pd.DataFrame(data=df_question)
+                df_bm['bm25'] = list(score)
+                df_bm['rank'] = df_bm['bm25'].rank(ascending=False)
+                df_bm = df_bm.nlargest(columns='bm25', n=3)
+                percentage = round((df_bm['bm25'].iloc[1] / df_bm['bm25'].iloc[0]) * 100, 2)
                 # print(check)
                 # print(df_bm.iloc[:, 3:7])
                 # if percentage >= 50:
@@ -136,18 +145,21 @@ def get_data():
                 #     print(percentage)
                 #     if check not in data_dict:
                 #         data_dict[check] = []  # Initialize an empty list for a new question ID
-                #     data_dict[check].append(percentage)
-                if question not in data_return:
-                    data_return[question] = []  # Initialize an empty list for a new question ID
+                #     data_dict[check].append(percentage)  # Initialize an empty list for a new question ID
                 if percentage < 50:
                     percentage = 0
-                data_return[question].append(percentage)
-            sorted_data_return = dict(sorted(data_return.items(), key=lambda x: int(x[0].split('Q')[1].split('-')[0])))
+            #     if temp['student_id'] == student_id:
+            #         answer_per.append(percentage)
+            #     temp['answers'] = answer_per
+
+                if student_id not in temp:
+                    temp[student_id] = {'student_id': student_id, 'answers': []}
+                temp[student_id]['answers'].append(percentage)
+            # sorted_data_return = dict(sorted(data_return.items(), key=lambda x: int(x[0].split('Q')[1].split('-')[0])))
             # print(new_dict)
     response_data = {
-        'student_id': keep_id,
         'question': list_q,
-        'percentage': sorted_data_return
+        'data': list(temp.values())
     }
 
     return response_data, 200
