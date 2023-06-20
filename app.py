@@ -50,6 +50,7 @@ def upload():
     file = request.files.get('file')
     file_stream = io.BytesIO(file.stream.read())
     with zipfile.ZipFile(file_stream, 'r') as zip_file:
+        student_ids = set()
         for file_name in zip_file.namelist():
             if '/' in file_name:
                 folder_names = file_name.split('/', 1)[0]
@@ -60,6 +61,7 @@ def upload():
                     if len(name_parts) >= 3:
                         student_name = name_parts[2].strip()
                     if student_id != 'Question' and 'Attempt1_textresponse' in file_name:
+                        student_ids.add(student_id)
                         text_response = zip_file.read(file_name).decode('utf-8')
                         text_response = text_response.lower()
                         if 'any text entered here will be displayed in the response input box when a new attempt ' \
@@ -82,6 +84,22 @@ def upload():
                         db.Question.insert_one(question_dict)
                 else:
                     return jsonify({'message': 'Invalid format'}), 400
+        all_questions = db.Question.distinct('question')
+        for question in all_questions:
+            for student_id in student_ids:
+                query = {
+                    'question': question,
+                    'student_id': student_id
+                }
+                if db.Question.count_documents(query) == 0:
+                    question_data = {
+                        'course_id': 3,
+                        'question': question,
+                        'student_name': 'null',
+                        'student_id': student_id,
+                        'answer': 'null'
+                    }
+                    db.Question.insert_one(question_data)
     return jsonify({'message': 'Upload successful'}), 200
 
 
@@ -98,7 +116,7 @@ def get_data():
         keep = df[df['question'] == question]
         df_question = pd.DataFrame(data=keep)
         keep_id = keep['student_id']
-        keep_id = sorted(keep_id, key=lambda x: (int(x[:2]), int(x[2:])))
+        keep_id = sorted(keep_id, key=lambda x: x[:2] + x[2:])
         for student_id in keep_id:
             data_for_id = df_question[df_question['student_id'] == student_id]
             answer = data_for_id['answer'].iloc[0]
@@ -122,13 +140,17 @@ def get_data():
                 df_bm['bm25'] = list(score)
                 df_bm['rank'] = df_bm['bm25'].rank(ascending=False)
                 df_bm = df_bm.nlargest(columns='bm25', n=3)
+                print(question)
+                print(student_id)
+                print(df_bm['student_name']+""+df_bm['answer'])
                 percentage = round((df_bm['bm25'].iloc[1] / df_bm['bm25'].iloc[0]) * 100, 2)
-
                 if percentage < 50:
                     percentage = 0
-                if student_id not in temp:
-                    temp[student_id] = {'student_id': student_id, 'answers': []}
-                temp[student_id]['answers'].append(percentage)
+            else:
+                percentage = 0
+            if student_id not in temp:
+                temp[student_id] = {'student_id': student_id, 'answers': []}
+            temp[student_id]['answers'].append(percentage)
     response_data = {
         'question': list_q,
         'data': list(temp.values())
