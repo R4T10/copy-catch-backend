@@ -138,7 +138,6 @@ def get_data():
                     percentage = 0
                 data_return[question].append(percentage)
             print(data_return)
-
     return jsonify({'student_id': keep_id}, {'question': list_q}, {'percentage': data_return}), 200
 
 
