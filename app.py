@@ -27,12 +27,12 @@ coding_words_file = 'assets/coding_words.txt'
 
 # my_api_key = "AIzaSyCkAsCqOzds-oFWnasdQlrx2ql2s2RtjWk"
 # my_cse_id = "042a0393f912b4ffa"
-my_api_key = "AIzaSyCmRvHOP1wJM5rUF9JMlpHgOA8yaaytae0"
-my_cse_id = "03082958736eb4b86"
+# my_api_key = "AIzaSyCmRvHOP1wJM5rUF9JMlpHgOA8yaaytae0"
+# my_cse_id = "03082958736eb4b86"
 # my_api_key = "AIzaSyCK2TB3yEzihRCiH9h17xUSbIZbR8nWbEk"
 # my_cse_id = "a454c0eb1bb48467b"
-# my_api_key = "AIzaSyAIusN4eOqS_GDypfgwtfT5TLC7DB96Ksk"
-# my_cse_id = "9605d29e4a84e43e6"
+my_api_key = "AIzaSyAIusN4eOqS_GDypfgwtfT5TLC7DB96Ksk"
+my_cse_id = "9605d29e4a84e43e6"
 # my_api_key = "AIzaSyB8gaMkDkbAT-NTRXw346rFGNjeiGdWW88"
 # my_cse_id = "02d90ac65942f44f3"
 
@@ -228,84 +228,34 @@ def searchGoogle():
                     results[i]["snippet"] = re.sub(r'[^a-zA-Z0-9 ]', ' ', results[i]["snippet"])
                     results[i]["snippet"] = perform_spell_correction(results[i]["snippet"])
                 df_web = pd.DataFrame(results, columns=['title', 'snippet', 'link'])
-                # print(df_web)
-                # print(results)
-                # scores = process_search_results(answer, results, vectorizer)
-                # max_score = max(scores)
-                # percentages = [(score / max_score) * 100 for score in scores]
-                # highest_percentage = max(percentages)  # Find the highest percentage
-                # highest_percentage_index = percentages.index(
-                #     highest_percentage)  # Find the index of the highest percentage
-                # highest_website = results[highest_percentage_index][
-                #     'formattedUrl']  # Get the website associated with the highest percentage
-                # highest_snippet = results[highest_percentage_index]['snippet']
-                # print(answer)
-                # print(f"Search Scores: {scores}")
-                # print(f"Percentages: {percentages}")
-                # print(f"Highest Percentage: {highest_percentage}")
-                # print(f"Highest Website: {highest_website}")
-                # print(f"Highest Snippet: {highest_snippet}")
-                # print('-----------------')
-                # print(results)
-                # test1 = BM25()
-                # test1.fit(df_question['answer'])
-                # score1 = test1.transform(answer)
-                # df_bm1 = pd.DataFrame(data=df_question)
-                # df_bm1['bm25'] = list(score1)
-                # df_bm1['rank'] = df_bm1['bm25'].rank(ascending=False)
-                # df_bm1 = df_bm1.nlargest(columns='bm25', n=3)
-                # base_score = df_bm1['bm25'].iloc[0]
-                # print("base score :", base_score)
-                # test = BM25()
-                # test.fit(df_web['snippet'])
                 answer_vector = vectorizer.transform([answer])
                 result_vectors = vectorizer.transform(df_web['snippet'])
                 scores = cosine_similarity(answer_vector, result_vectors)
                 scores = scores[0]
-
-                # score = test.transform(answer)
                 df_bm = pd.DataFrame(data=df_web)
                 df_bm['tfidf'] = list(scores)
                 df_bm['rank'] = df_bm['tfidf'].rank(ascending=False)
                 df_bm = df_bm.nlargest(columns='tfidf', n=5)
-                percentages = (df_bm['tfidf'].iloc[0] * 100)
+                percentage = round((df_bm['tfidf'].iloc[0] * 100),2)
                 print(answer)
                 print(df_bm[['snippet', 'tfidf', 'link']])
-                print(percentages)
-                # print(percentages)
+                print(percentage)
 
-    # for result in results:
-    #     print(result['title'])
-    #     print(result['snippet'])
-    #     print(result['formattedUrl'])
-    #     print("---------------------------")
-    # df_web = pd.DataFrame(results,
-    #                       columns=['title', 'snippet', 'formattedUrl'])
-    # print(df_web)
-    # test = BM25()
-    # test.fit(df_web['snippet'])
-    # score = test.transform(answer)
-    # df_bm = pd.DataFrame(data=df_web)
-    # df_bm['bm25'] = list(score)
-    # df_bm['rank'] = df_bm['bm25'].rank(ascending=False)
-    # df_bm = df_bm.nlargest(columns='bm25', n=3)
-    # print(df_bm['title'])
-    # print(df_bm['bm25'])
-    # percentage = round((df_bm['bm25'].iloc[1] / df_bm['bm25'].iloc[0]) * 100, 2)
-    # if percentage < 50:
-    #     percentage = 0
-    # print(percentage)
-    # else:
-    #     percentage = 0
-    # if student_id not in temp:
-    #     temp[student_id] = {'student_id': student_id, 'answers': []}
-    # temp[student_id]['answers'].append(percentage)
-    # response_data = {
-    #     'question': list_q,
-    #     'data': list(temp.values())
-    # }
-    #
-    return 'test'
+                if percentage < 50:
+                    percentage = 0
+                print(percentage)
+            else:
+                percentage = 0
+            if student_id not in temp:
+                temp[student_id] = {'student_id': student_id, 'answers': []}
+            temp[student_id]['answers'].append(percentage)
+
+    response_data = {
+        'question': list_q,
+        'data': list(temp.values())
+    }
+
+    return response_data, 200
 
 
 @app.route('/search_google2', methods=['GET'])
