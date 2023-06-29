@@ -24,17 +24,17 @@ spellchecker = SpellChecker(language='en')
 
 # Path to the coding_words.txt file
 coding_words_file = 'assets/coding_words.txt'
-
-# my_api_key = "AIzaSyCkAsCqOzds-oFWnasdQlrx2ql2s2RtjWk"
-# my_cse_id = "042a0393f912b4ffa"
-# my_api_key = "AIzaSyCmRvHOP1wJM5rUF9JMlpHgOA8yaaytae0"
-# my_cse_id = "03082958736eb4b86"
-# my_api_key = "AIzaSyCK2TB3yEzihRCiH9h17xUSbIZbR8nWbEk"
-# my_cse_id = "a454c0eb1bb48467b"
-my_api_key = "AIzaSyAIusN4eOqS_GDypfgwtfT5TLC7DB96Ksk"
-my_cse_id = "9605d29e4a84e43e6"
-# my_api_key = "AIzaSyB8gaMkDkbAT-NTRXw346rFGNjeiGdWW88"
-# my_cse_id = "02d90ac65942f44f3"
+#
+# # my_api_key = "AIzaSyCkAsCqOzds-oFWnasdQlrx2ql2s2RtjWk"
+# # my_cse_id = "042a0393f912b4ffa"
+# # my_api_key = "AIzaSyCmRvHOP1wJM5rUF9JMlpHgOA8yaaytae0"
+# # my_cse_id = "03082958736eb4b86"
+# # my_api_key = "AIzaSyCK2TB3yEzihRCiH9h17xUSbIZbR8nWbEk"
+# # my_cse_id = "a454c0eb1bb48467b"
+# my_api_key = "AIzaSyAIusN4eOqS_GDypfgwtfT5TLC7DB96Ksk"
+# my_cse_id = "9605d29e4a84e43e6"
+# # my_api_key = "AIzaSyB8gaMkDkbAT-NTRXw346rFGNjeiGdWW88"
+# # my_cse_id = "02d90ac65942f44f3"
 
 # Open the coding_words.txt file
 with open(coding_words_file, 'r') as file:
@@ -153,6 +153,9 @@ def comparingStudentAnswer():
     list_q = list(set(question))
     list_q = sorted(list_q, key=lambda x: int(x.split('-')[0][1:]))
     temp = {}
+    # vectorizer = TfidfVectorizer()
+    # corpus = df['answer'].tolist()
+    # vectorizer.fit(corpus)
     for question in list_q:
         keep = df[df['question'] == question]
         df_question = pd.DataFrame(data=keep)
@@ -177,6 +180,10 @@ def comparingStudentAnswer():
                 test = BM25()
                 test.fit(df_question['answer'])
                 score = test.transform(answer)
+                # answer_vector = vectorizer.transform([answer])
+                # result_vectors = vectorizer.transform(df_question['answer'])
+                # scores = cosine_similarity(answer_vector, result_vectors)
+                # scores = scores[0]
                 df_bm = pd.DataFrame(data=df_question)
                 df_bm['bm25'] = list(score)
                 df_bm['rank'] = df_bm['bm25'].rank(ascending=False)
@@ -258,94 +265,94 @@ def searchGoogle():
     return response_data, 200
 
 
-@app.route('/search_google2', methods=['GET'])
-def searchGoogle2():
-    answer = "ensure security groups do not allow ingress from 0 0 0 0 0 to port 3389 eco instance does not allow inbound traffic from all to tcp port 2379"
-    global keep_id, sorted_data_return, new_dict
-    data = {
-        "title": ["Ensure Security Groups do not allow ingress from 0.0.0.0/0 to port ...",
-                  "HAProxy Network Error: cannot bind socket | DigitalOcean",
-                  "Ensure Security Groups accept traffic only from ports 80 and 443"
-            , "APISIX Ingress Controller the Hard Way | Apache APISIX® -- Cloud ..",
-                  "https://opendev.org/openstack/osops/commit/c560cdc..."],
-        "snippet": [
-            "Ensure Security Groups do not allow ingress from 0.0.0.0/0 to port 3389 ... EC2 instance does not allow inbound traffic from all to TCP port 2379",
-            "Nov 4, 2020 ... The issue is that only a single process can be bound to an IP address and port combination at any given time. In the second case, when HAProxy ...",
-            "For HTTPS traffic, add an inbound rule on port 443 from the source address 0.0.0.0/0. These inbound rules allow traffic from IPv4 addresses. We recommend you ...",
-            "In this tutorial, we will install APISIX and APISIX Ingress Controller in ... ports: - name: \"client\" port: 2379 targetPort: client - name: \"peer\"",
-            "Add security rules to allow ping, ssh, docker access + 4. ... +# create a specific application layer security group that routes database port 3306 traffic, ..."],
-        "formattedUrl": ["https://docs.bridgecrew.io/docs/networking_2",
-                         "https://www.digitalocean.com/.../haproxy-network-error-cannot-bind-socket",
-                         "https://docs.bridgecrew.io/docs/networking_11",
-                         "https://apisix.apache.org/docs/ingress-controller/tutorials/the-hard-way",
-                         "https://opendev.org/.../c560cdc64dcc66a92de628bd614fcd687bca4f5c.diff"]
-    }
-    data["snippet"] = [snippet.lower() for snippet in data["snippet"]]
-    data["snippet"] = [re.sub(r'[^a-zA-Z0-9 ]', ' ', snippet) for snippet in data["snippet"]]
-    data["snippet"] = [join_text(snippet) for snippet in data["snippet"]]
-    print(data)
-    df_web = pd.DataFrame(data, columns=['title', 'snippet', 'formattedUrl'])
-    data = db.Question.find({'course_id': 3})
-    df = pd.DataFrame(data, columns=['_id', 'course_id', 'question', 'student_id', 'student_name', 'answer'])
-    question = df['question']
-    list_q = list(set(question))
-    list_q = sorted(list_q, key=lambda x: int(x.split('-')[0][1:]))
-    temp = {}
-    vectorizer = TfidfVectorizer()
-    corpus = df_web['snippet'].tolist()
-    vectorizer.fit(corpus)
-    # for question in list_q:
-    #     keep = df[df['question'] == question]
-    #     df_question = pd.DataFrame(data=keep)
-    #     keep_id = keep['student_id']
-    #     keep_id = sorted(keep_id, key=lambda x: x[:2] + x[2:])
-    #     for student_id in keep_id:
-    #         data_for_id = df_question[df_question['student_id'] == student_id]
-    #         answer = data_for_id['answer'].iloc[0]
-    #         if answer != 'null':
-    #             answer = answer.lower()
-    # test = BM25()
-    # test.fit(df_question['answer'])
-    # score = test.transform(answer)
-    # df_bm = pd.DataFrame(data=df_question)
-    # df_bm['bm25'] = list(score)
-    # df_bm['rank'] = df_bm['bm25'].rank(ascending=False)
-    # df_bm = df_bm.nlargest(columns='bm25', n=3)
-    # print('-----------------')
-    # print(df_bm['bm25'].iloc[0])
-    #
-    # answer.lower()
-    # answer = re.sub(r'[^a-zA-Z0-9 ]', ' ', answer)
-    # test = BM25()
-    # test.fit(df_web['snippet'])
-    answer_vector = vectorizer.transform([answer])
-    result_vectors = vectorizer.transform(df_web['snippet'])
-    scores = cosine_similarity(answer_vector, result_vectors)
-    scores = scores[0]
-    df_bm = pd.DataFrame(data=df_web)
-    df_bm['bm25'] = list(scores)
-    df_bm['rank'] = df_bm['bm25'].rank(ascending=False)
-    df_bm = df_bm.nlargest(columns='bm25', n=5)
-
-    print(df_bm[['snippet', 'bm25', 'link']])
-    # print(df_bm['bm25'])
-    # print(df_bm['bm25'])
-    # results = google_search(answer, my_api_key, my_cse_id)
-    # scores = process_search_results(answer, results, vectorizer)
-    # max_score = max(scores)
-    # percentages = (df_bm['bm25'].iloc[0] / 100) * 100
-    # print(percentages)
-    #
-    # print(answer)
-    # print('-----------------')
-    # print(f"Search Scores: {scores}")
-    # print(f"Percentages: {percentages}")
-    # print('-----------------')
-
-    # if percentage < 50:
-    #     percentage = 0
-    # print(percentage)
-    return "Success"
+# @app.route('/search_google2', methods=['GET'])
+# def searchGoogle2():
+#     answer = "ensure security groups do not allow ingress from 0 0 0 0 0 to port 3389 eco instance does not allow inbound traffic from all to tcp port 2379"
+#     global keep_id, sorted_data_return, new_dict
+#     data = {
+#         "title": ["Ensure Security Groups do not allow ingress from 0.0.0.0/0 to port ...",
+#                   "HAProxy Network Error: cannot bind socket | DigitalOcean",
+#                   "Ensure Security Groups accept traffic only from ports 80 and 443"
+#             , "APISIX Ingress Controller the Hard Way | Apache APISIX® -- Cloud ..",
+#                   "https://opendev.org/openstack/osops/commit/c560cdc..."],
+#         "snippet": [
+#             "Ensure Security Groups do not allow ingress from 0.0.0.0/0 to port 3389 ... EC2 instance does not allow inbound traffic from all to TCP port 2379",
+#             "Nov 4, 2020 ... The issue is that only a single process can be bound to an IP address and port combination at any given time. In the second case, when HAProxy ...",
+#             "For HTTPS traffic, add an inbound rule on port 443 from the source address 0.0.0.0/0. These inbound rules allow traffic from IPv4 addresses. We recommend you ...",
+#             "In this tutorial, we will install APISIX and APISIX Ingress Controller in ... ports: - name: \"client\" port: 2379 targetPort: client - name: \"peer\"",
+#             "Add security rules to allow ping, ssh, docker access + 4. ... +# create a specific application layer security group that routes database port 3306 traffic, ..."],
+#         "formattedUrl": ["https://docs.bridgecrew.io/docs/networking_2",
+#                          "https://www.digitalocean.com/.../haproxy-network-error-cannot-bind-socket",
+#                          "https://docs.bridgecrew.io/docs/networking_11",
+#                          "https://apisix.apache.org/docs/ingress-controller/tutorials/the-hard-way",
+#                          "https://opendev.org/.../c560cdc64dcc66a92de628bd614fcd687bca4f5c.diff"]
+#     }
+#     data["snippet"] = [snippet.lower() for snippet in data["snippet"]]
+#     data["snippet"] = [re.sub(r'[^a-zA-Z0-9 ]', ' ', snippet) for snippet in data["snippet"]]
+#     data["snippet"] = [join_text(snippet) for snippet in data["snippet"]]
+#     print(data)
+#     df_web = pd.DataFrame(data, columns=['title', 'snippet', 'formattedUrl'])
+#     data = db.Question.find({'course_id': 3})
+#     df = pd.DataFrame(data, columns=['_id', 'course_id', 'question', 'student_id', 'student_name', 'answer'])
+#     question = df['question']
+#     list_q = list(set(question))
+#     list_q = sorted(list_q, key=lambda x: int(x.split('-')[0][1:]))
+#     temp = {}
+#     vectorizer = TfidfVectorizer()
+#     corpus = df_web['snippet'].tolist()
+#     vectorizer.fit(corpus)
+#     # for question in list_q:
+#     #     keep = df[df['question'] == question]
+#     #     df_question = pd.DataFrame(data=keep)
+#     #     keep_id = keep['student_id']
+#     #     keep_id = sorted(keep_id, key=lambda x: x[:2] + x[2:])
+#     #     for student_id in keep_id:
+#     #         data_for_id = df_question[df_question['student_id'] == student_id]
+#     #         answer = data_for_id['answer'].iloc[0]
+#     #         if answer != 'null':
+#     #             answer = answer.lower()
+#     # test = BM25()
+#     # test.fit(df_question['answer'])
+#     # score = test.transform(answer)
+#     # df_bm = pd.DataFrame(data=df_question)
+#     # df_bm['bm25'] = list(score)
+#     # df_bm['rank'] = df_bm['bm25'].rank(ascending=False)
+#     # df_bm = df_bm.nlargest(columns='bm25', n=3)
+#     # print('-----------------')
+#     # print(df_bm['bm25'].iloc[0])
+#     #
+#     # answer.lower()
+#     # answer = re.sub(r'[^a-zA-Z0-9 ]', ' ', answer)
+#     # test = BM25()
+#     # test.fit(df_web['snippet'])
+#     answer_vector = vectorizer.transform([answer])
+#     result_vectors = vectorizer.transform(df_web['snippet'])
+#     scores = cosine_similarity(answer_vector, result_vectors)
+#     scores = scores[0]
+#     df_bm = pd.DataFrame(data=df_web)
+#     df_bm['bm25'] = list(scores)
+#     df_bm['rank'] = df_bm['bm25'].rank(ascending=False)
+#     df_bm = df_bm.nlargest(columns='bm25', n=5)
+#
+#     print(df_bm[['snippet', 'bm25', 'link']])
+#     # print(df_bm['bm25'])
+#     # print(df_bm['bm25'])
+#     # results = google_search(answer, my_api_key, my_cse_id)
+#     # scores = process_search_results(answer, results, vectorizer)
+#     # max_score = max(scores)
+#     # percentages = (df_bm['bm25'].iloc[0] / 100) * 100
+#     # print(percentages)
+#     #
+#     # print(answer)
+#     # print('-----------------')
+#     # print(f"Search Scores: {scores}")
+#     # print(f"Percentages: {percentages}")
+#     # print('-----------------')
+#
+#     # if percentage < 50:
+#     #     percentage = 0
+#     # print(percentage)
+#     return "Success"
 
 
 if __name__ == '__main__':
