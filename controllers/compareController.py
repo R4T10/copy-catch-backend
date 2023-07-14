@@ -1,20 +1,10 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-from flask_pymongo import PyMongo
-import io
-import zipfile
-import json
 import re
 import pandas as pd
-
-from models.database import mongo
-from models.question import Question
 from BM25 import BM25
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from googleapiclient.discovery import build
-from spellchecker import SpellChecker
-from app import spellchecker
+from app import spellchecker, mongo
 
 # my_api_key = "AIzaSyCkAsCqOzds-oFWnasdQlrx2ql2s2RtjWk"
 # my_cse_id = "042a0393f912b4ffa"

@@ -3,10 +3,20 @@ import io
 import zipfile
 import re
 
+from app import spellchecker, mongo
 from models.question import Question
-from models.database import mongo
-from models.spellchecker import SpellChecker
+
 db = mongo.db
+
+
+def perform_spell_correction(text):
+    corrected_text = []
+    words = text.split()
+    for word in words:
+        corrected_word = spellchecker.correction(word)
+        corrected_text.append(corrected_word)
+    spell_corr = list(filter(None, corrected_text))
+    return ' '.join(spell_corr)
 
 
 class UploadController:
@@ -43,7 +53,7 @@ class UploadController:
                             if "don't" in text_response:
                                 text_response = text_response.replace("don't", 'do not')
                             text_response = re.sub(r'[^a-zA-Z0-9 ]', ' ', text_response)
-                            text_response = SpellChecker.perform_spell_correction(text_response)
+                            text_response = perform_spell_correction(text_response)
                             question = Question(course_id=3, question=folder_names, student_name=student_name,
                                                 student_id=student_id, answer=text_response)
                             question_dict = question.to_dict()
