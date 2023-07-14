@@ -1,5 +1,8 @@
 import re
 import pandas as pd
+from bson import ObjectId
+from flask import request
+
 from BM25 import BM25
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
@@ -40,8 +43,21 @@ class CompareController:
     @staticmethod
     def comparingStudentAnswer():
         global keep_id, sorted_data_return, new_dict
-        data = db.Question.find({'course_id': 3})
+        course_id = request.args.get('id')
+        course_id = ObjectId(course_id)
+        print(course_id)
+        data = db.Question.find({'course_id': course_id})
         df = pd.DataFrame(data, columns=['_id', 'course_id', 'question', 'student_id', 'student_name', 'answer'])
+        courses = []
+        for course in data:
+            courses.append({
+                'course_id': course['course_id'],
+                'question': course['question'],
+                'student_id': course['student_id'],
+                'student_name': course['student_name'],
+                'answer': course['answer']
+            })
+        print(courses)
         question = df['question']
         list_q = list(set(question))
         list_q = sorted(list_q, key=lambda x: int(x.split('-')[0][1:]))
@@ -81,6 +97,7 @@ class CompareController:
                     percentage = round((df_bm['bm25'].iloc[1] / df_bm['bm25'].iloc[0]) * 100, 2)
                     if percentage < 50:
                         percentage = 0
+                    print(percentage)
                 else:
                     percentage = 0
                 if student_id not in temp:
@@ -96,7 +113,7 @@ class CompareController:
     @staticmethod
     def searchGoogle():
         global results
-        data = db.Question.find({'course_id': 3})
+        data = db.Question.find({'course_id': ObjectId('64a295a45d63600866c3ced7')})
         df = pd.DataFrame(data, columns=['_id', 'course_id', 'question', 'student_id', 'student_name', 'answer'])
         question = df['question']
         list_q = list(set(question))
