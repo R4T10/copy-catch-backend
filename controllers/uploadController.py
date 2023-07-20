@@ -28,6 +28,13 @@ class UploadController:
         course_id = request.form['id']
         course_id = ObjectId(course_id)
         file_stream = io.BytesIO(file.stream.read())
+
+        try:
+            with zipfile.ZipFile(file.stream) as zip_file:
+                pass
+        except zipfile.BadZipFile:
+            return jsonify({'message': 'Invalid file type'}), 400
+
         with zipfile.ZipFile(file_stream, 'r') as zip_file:
             student_ids = set()
             for file_name in zip_file.namelist():
