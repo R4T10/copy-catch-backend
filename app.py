@@ -90,6 +90,12 @@ def process_search_results(answer, snippets, vectorizer):
 def upload():
     file = request.files.get('file')
     file_stream = io.BytesIO(file.stream.read())
+    try:
+        with zipfile.ZipFile(file.stream) as zip_file:
+            pass
+    except zipfile.BadZipFile:
+        return jsonify({'message': 'Invalid file type'}), 200
+
     with zipfile.ZipFile(file_stream, 'r') as zip_file:
         student_ids = set()
         for file_name in zip_file.namelist():
@@ -124,7 +130,7 @@ def upload():
                         question_dict = question.to_dict()
                         db.Question.insert_one(question_dict)
                 else:
-                    return jsonify({'message': 'Invalid format'}), 400
+                    return jsonify({'message': 'Invalid format'}), 200
         all_questions = db.Question.distinct('question')
         for question in all_questions:
             for student_id in student_ids:
