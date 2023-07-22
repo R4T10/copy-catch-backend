@@ -42,7 +42,7 @@ def perform_spell_correction(text):
 class CompareController:
     @staticmethod
     def comparingStudentAnswer():
-        global keep_id, sorted_data_return, new_dict
+        global keep_id, sorted_data_return, new_dict, df_bm
         course_id = request.args.get('id')
         course_id = ObjectId(course_id)
         print(course_id)
@@ -71,18 +71,6 @@ class CompareController:
                 data_for_id = df_question[df_question['student_id'] == student_id]
                 answer = data_for_id['answer'].iloc[0]
                 if answer != 'null':
-                    # vectorizer = TfidfVectorizer()
-                    # vectorizer.fit_transform(df_question['answer'])
-                    # print(student_id)
-                    # score = vectorizer.transform([answer])
-                    # df_tfidf = pd.DataFrame(data=df_question)
-                    # print(score.data)
-                    # df_tfidf['tfidf'] = scores.data
-                    # df_tfidf['rank'] = df_tfidf['tfidf'].rank(ascending=False)
-                    # df_tfidf = df_tfidf.nlargest(columns='tfidf', n=3)
-                    # print(df_tfidf)
-                    # percentage = round((df_tfidf['tfidf'].iloc[1] / df_tfidf['tfidf'].iloc[0]) * 100, 2)
-                    # print(df_tfidf)
                     test = BM25()
                     test.fit(df_question['answer'])
                     score = test.transform(answer)
@@ -102,7 +90,22 @@ class CompareController:
                     percentage = 0
                 if student_id not in temp:
                     temp[student_id] = {'student_id': student_id, 'answers': []}
-                temp[student_id]['answers'].append(percentage)
+
+                if percentage > 0:  # Add a check to exclude entries with percentage = 0
+                    # Add the student_name and comparison data to the temp dictionary
+                    temp[student_id]['student_name'] = data_for_id['student_name'].iloc[0]
+                    comparison_data = df_bm[['student_name', 'answer']].to_dict(orient='records')
+                    temp[student_id]['answers'].append({
+                        'question': question,
+                        'comparison_data': comparison_data,
+                        'percentage': percentage  # Add the percentage value here
+                    })
+                else:
+                    temp[student_id]['student_name'] = data_for_id['student_name'].iloc[0]
+                    temp[student_id]['answers'].append({
+                        'question': question,
+                        'percentage': percentage
+                    })
         response_data = {
             'question': list_q,
             'data': list(temp.values())
