@@ -62,14 +62,18 @@ class CompareController:
         list_q = list(set(question))
         list_q = sorted(list_q, key=lambda x: int(x.split('-')[0][1:]))
         temp = {}
+        df_bm_dict = {}
+        prev_student_names = {}
         for question in list_q:
             keep = df[df['question'] == question]
             df_question = pd.DataFrame(data=keep)
+            print(df_question)
             keep_id = keep['student_id']
             keep_id = sorted(keep_id, key=lambda x: x[:2] + x[2:])
             for student_id in keep_id:
                 data_for_id = df_question[df_question['student_id'] == student_id]
                 answer = data_for_id['answer'].iloc[0]
+                student_name = data_for_id['student_name'].iloc[0]
                 if answer != 'null':
                     test = BM25()
                     test.fit(df_question['answer'])
@@ -77,7 +81,7 @@ class CompareController:
                     df_bm = pd.DataFrame(data=df_question)
                     df_bm['bm25'] = list(score)
                     df_bm['rank'] = df_bm['bm25'].rank(ascending=False)
-                    df_bm = df_bm.nlargest(columns='bm25', n=3)
+                    df_bm = df_bm.nlargest(columns='bm25', n=4)
                     print(question)
                     print(student_id)
                     print(df_bm['student_name'] + "" + df_bm['answer'])
@@ -88,24 +92,32 @@ class CompareController:
                     print(percentage)
                 else:
                     percentage = 0
+                    student_name = prev_student_names.get(student_id, None)
+
                 if student_id not in temp:
                     temp[student_id] = {'student_id': student_id, 'answers': []}
 
-                if percentage > 0:  # Add a check to exclude entries with percentage = 0
-                    # Add the student_name and comparison data to the temp dictionary
-                    temp[student_id]['student_name'] = data_for_id['student_name'].iloc[0]
+                if student_name:
+                    temp[student_id]['student_name'] = student_name
                     comparison_data = df_bm[['student_name', 'answer']].to_dict(orient='records')
                     temp[student_id]['answers'].append({
                         'question': question,
                         'comparison_data': comparison_data,
                         'percentage': percentage  # Add the percentage value here
                     })
-                else:
-                    temp[student_id]['student_name'] = data_for_id['student_name'].iloc[0]
+
+                prev_student_names[student_id] = student_name
+
+                if not student_name and 'student_name' in temp[student_id]:
+                    temp[student_id]['student_name'] = prev_student_names[student_id]
+
+                if not student_name:
                     temp[student_id]['answers'].append({
                         'question': question,
                         'percentage': percentage
                     })
+                df_bm_dict[question] = df_bm
+
         response_data = {
             'question': list_q,
             'data': list(temp.values())
