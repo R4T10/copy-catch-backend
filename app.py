@@ -125,7 +125,7 @@ def upload():
                             text_response = text_response.replace("don't", 'do not')
                         text_response = re.sub(r'[^a-zA-Z0-9 ]', ' ', text_response)
                         text_response = perform_spell_correction(text_response)
-                        question = Question(course_id=3, question=folder_names, student_name=student_name,
+                        question = Question(course_id="3", question=folder_names, student_name=student_name,
                                             student_id=student_id, answer=text_response)
                         question_dict = question.to_dict()
                         db.Question.insert_one(question_dict)
@@ -140,7 +140,7 @@ def upload():
                 }
                 if db.Question.count_documents(query) == 0:
                     question_data = {
-                        'course_id': 3,
+                        'course_id': "3",
                         'question': question,
                         'student_name': 'null',
                         'student_id': student_id,
@@ -153,7 +153,7 @@ def upload():
 @app.route('/comparing_student', methods=['GET'])
 def comparingStudentAnswer():
     global keep_id, sorted_data_return, new_dict
-    data = db.Question.find({'course_id': 3})
+    data = db.Question.find({'course_id': "3"})
     df = pd.DataFrame(data, columns=['_id', 'course_id', 'question', 'student_id', 'student_name', 'answer'])
     question = df['question']
     list_q = list(set(question))
@@ -210,7 +210,7 @@ def comparingStudentAnswer():
 @app.route('/search_google', methods=['GET'])
 def searchGoogle():
     global results
-    data = db.Question.find({'course_id': 3})
+    data = db.Question.find({'course_id': "3"})
     df = pd.DataFrame(data, columns=['_id', 'course_id', 'question', 'student_id', 'student_name', 'answer'])
     question = df['question']
     list_q = list(set(question))
