@@ -152,8 +152,9 @@ def upload():
 
 @app.route('/comparing_student', methods=['GET'])
 def comparingStudentAnswer():
-    global keep_id, sorted_data_return, new_dict
-    data = db.Question.find({'course_id': "3"})
+    global keep_id, sorted_data_return, new_dicts
+    course_id = request.args.get('id')
+    data = db.Question.find({'course_id': course_id})
     df = pd.DataFrame(data, columns=['_id', 'course_id', 'question', 'student_id', 'student_name', 'answer'])
     question = df['question']
     list_q = list(set(question))
@@ -210,7 +211,8 @@ def comparingStudentAnswer():
 @app.route('/search_google', methods=['GET'])
 def searchGoogle():
     global results
-    data = db.Question.find({'course_id': "3"})
+    # course_id = request.args.get('id')
+    data = db.Question.find({'course_id': '3'})
     df = pd.DataFrame(data, columns=['_id', 'course_id', 'question', 'student_id', 'student_name', 'answer'])
     question = df['question']
     list_q = list(set(question))
