@@ -100,10 +100,17 @@ class CompareController:
                 if student_name:
                     temp[student_id]['student_name'] = student_name
                     comparison_data = df_bm[['student_name', 'answer']].to_dict(orient='records')
+                    found_answer = None
+                    for entry in comparison_data:
+                        if entry['student_name'] == student_name:
+                            found_answer = entry['answer']
+                            break
                     temp[student_id]['answers'].append({
                         'question': question,
-                        'comparison_data': comparison_data,
-                        'percentage': percentage  # Add the percentage value here
+                        'answer': found_answer,
+                        'comparison_data': [entry for entry in comparison_data if
+                                            entry['student_name'] != student_name],
+                        'percentage': percentage
                     })
 
                 prev_student_names[student_id] = student_name
