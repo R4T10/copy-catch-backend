@@ -15,10 +15,10 @@ from app import spellchecker, mongo
 # my_cse_id = "03082958736eb4b86"
 # my_api_key = "AIzaSyCK2TB3yEzihRCiH9h17xUSbIZbR8nWbEk"
 # my_cse_id = "a454c0eb1bb48467b"
-my_api_key = "AIzaSyAIusN4eOqS_GDypfgwtfT5TLC7DB96Ksk"
-my_cse_id = "9605d29e4a84e43e6"
-# my_api_key = "AIzaSyB8gaMkDkbAT-NTRXw346rFGNjeiGdWW88"
-# my_cse_id = "02d90ac65942f44f3"
+# my_api_key = "AIzaSyAIusN4eOqS_GDypfgwtfT5TLC7DB96Ksk"
+# my_cse_id = "9605d29e4a84e43e6"
+my_api_key = "AIzaSyB8gaMkDkbAT-NTRXw346rFGNjeiGdWW88"
+my_cse_id = "02d90ac65942f44f3"
 
 db = mongo.db
 
@@ -100,14 +100,9 @@ class CompareController:
                 if student_name:
                     temp[student_id]['student_name'] = student_name
                     comparison_data = df_bm[['student_name', 'answer']].to_dict(orient='records')
-                    found_answer = None
-                    for entry in comparison_data:
-                        if entry['student_name'] == student_name:
-                            found_answer = entry['answer']
-                            break
                     temp[student_id]['answers'].append({
                         'question': question,
-                        'answer': found_answer,
+                        'answer': answer,
                         'comparison_data': [entry for entry in comparison_data if
                                             entry['student_name'] != student_name],
                         'percentage': percentage
@@ -134,13 +129,17 @@ class CompareController:
 
     @staticmethod
     def searchGoogle():
-        global results
-        data = db.Question.find({'course_id': ObjectId('64a295a45d63600866c3ced7')})
+        global results, df_bm
+        course_id = request.args.get('id')
+        course_id = ObjectId(course_id)
+        data = db.Question.find({'course_id': course_id})
         df = pd.DataFrame(data, columns=['_id', 'course_id', 'question', 'student_id', 'student_name', 'answer'])
         question = df['question']
         list_q = list(set(question))
         list_q = sorted(list_q, key=lambda x: int(x.split('-')[0][1:]))
         temp = {}
+        df_bm_dict = {}
+        prev_student_names = {}
         vectorizer = TfidfVectorizer()
         corpus = df['answer'].tolist()
         vectorizer.fit(corpus)
@@ -152,6 +151,8 @@ class CompareController:
             for student_id in keep_id:
                 data_for_id = df_question[df_question['student_id'] == student_id]
                 answer = data_for_id['answer'].iloc[0]
+                student_name = data_for_id['student_name'].iloc[0]
+
                 if answer != 'null':
                     results = google_search(answer, my_api_key, my_cse_id)
                     for i in range(len(results)):
@@ -177,9 +178,33 @@ class CompareController:
                     print(percentage)
                 else:
                     percentage = 0
+
                 if student_id not in temp:
                     temp[student_id] = {'student_id': student_id, 'answers': []}
-                temp[student_id]['answers'].append(percentage)
+
+                # Retrieve the previous student name
+                prev_name = prev_student_names.get(student_id, None)
+                if prev_name:
+                    temp[student_id]['student_name'] = prev_name
+
+                temp[student_id]['answers'].append({
+                    'question': question,
+                    'answer': answer,
+                    'comparison_data': df_bm[['snippet', 'link']].to_dict(orient='records'),
+                    'percentage': percentage
+                })
+
+                prev_student_names[student_id] = student_name
+
+                if not student_name and 'student_name' in temp[student_id]:
+                    temp[student_id]['student_name'] = prev_student_names[student_id]
+
+                if not student_name:
+                    temp[student_id]['answers'].append({
+                        'question': question,
+                        'percentage': percentage
+                    })
+                df_bm_dict[question] = df_bm
 
         response_data = {
             'question': list_q,
@@ -187,3 +212,6 @@ class CompareController:
         }
 
         return response_data, 200
+
+
+
