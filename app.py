@@ -27,12 +27,12 @@ coding_words_file = 'assets/coding_words.txt'
 
 # my_api_key = "AIzaSyCkAsCqOzds-oFWnasdQlrx2ql2s2RtjWk"
 # my_cse_id = "042a0393f912b4ffa"
-# my_api_key = "AIzaSyCmRvHOP1wJM5rUF9JMlpHgOA8yaaytae0"
-# my_cse_id = "03082958736eb4b86"
+my_api_key = "AIzaSyCmRvHOP1wJM5rUF9JMlpHgOA8yaaytae0"
+my_cse_id = "03082958736eb4b86"
 # my_api_key = "AIzaSyCK2TB3yEzihRCiH9h17xUSbIZbR8nWbEk"
 # my_cse_id = "a454c0eb1bb48467b"
-my_api_key = "AIzaSyAIusN4eOqS_GDypfgwtfT5TLC7DB96Ksk"
-my_cse_id = "9605d29e4a84e43e6"
+# my_api_key = "AIzaSyAIusN4eOqS_GDypfgwtfT5TLC7DB96Ksk"
+# my_cse_id = "9605d29e4a84e43e6"
 # my_api_key = "AIzaSyB8gaMkDkbAT-NTRXw346rFGNjeiGdWW88"
 # my_cse_id = "02d90ac65942f44f3"
 
@@ -131,6 +131,8 @@ def upload():
                         db.Question.insert_one(question_dict)
                 else:
                     return jsonify({'message': 'Invalid format'}), 200
+            else:
+                return jsonify({'message': 'Invalid format'}), 200
         all_questions = db.Question.distinct('question')
         for question in all_questions:
             for student_id in student_ids:
@@ -211,8 +213,8 @@ def comparingStudentAnswer():
 @app.route('/search_google', methods=['GET'])
 def searchGoogle():
     global results
-    # course_id = request.args.get('id')
-    data = db.Question.find({'course_id': '3'})
+    course_id = request.args.get('id')
+    data = db.Question.find({'course_id': course_id})
     df = pd.DataFrame(data, columns=['_id', 'course_id', 'question', 'student_id', 'student_name', 'answer'])
     question = df['question']
     list_q = list(set(question))
