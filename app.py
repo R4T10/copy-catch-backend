@@ -130,9 +130,7 @@ def upload():
                         question_dict = question.to_dict()
                         db.Question.insert_one(question_dict)
                 else:
-                    return jsonify({'message': 'Invalid format'}), 200
-            else:
-                return jsonify({'message': 'Invalid format'}), 200
+                    return jsonify({'message': 'Invalid file format'}), 200
         all_questions = db.Question.distinct('question')
         for question in all_questions:
             for student_id in student_ids:
