@@ -268,7 +268,7 @@ def searchGoogle():
 
 @app.route('/google_search', methods=['GET'])
 def search_query():
-    query = request.args.get("google_search", default="", type=str)
+    query = request.args.get("search_term", default="", type=str)
     results = google_search(query, my_api_key, my_cse_id)
     for result in results:
         print(result)
