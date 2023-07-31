@@ -8,7 +8,7 @@ from models.course import Course
 class CourseController:
     @staticmethod
     def get_course_list():
-        professor = 'Krit'
+        professor = request.form['name']
         data = db.Courses.find({'professor': professor})
         courses = []
         for course in data:
