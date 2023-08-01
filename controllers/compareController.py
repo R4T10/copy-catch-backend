@@ -9,16 +9,16 @@ from sklearn.metrics.pairwise import cosine_similarity
 from googleapiclient.discovery import build
 from app import spellchecker, mongo
 
-# my_api_key = "AIzaSyCkAsCqOzds-oFWnasdQlrx2ql2s2RtjWk"
-# my_cse_id = "042a0393f912b4ffa"
+my_api_key = "AIzaSyCkAsCqOzds-oFWnasdQlrx2ql2s2RtjWk"
+my_cse_id = "042a0393f912b4ffa"
 # my_api_key = "AIzaSyCmRvHOP1wJM5rUF9JMlpHgOA8yaaytae0"
 # my_cse_id = "03082958736eb4b86"
 # my_api_key = "AIzaSyCK2TB3yEzihRCiH9h17xUSbIZbR8nWbEk"
 # my_cse_id = "a454c0eb1bb48467b"
 # my_api_key = "AIzaSyAIusN4eOqS_GDypfgwtfT5TLC7DB96Ksk"
 # my_cse_id = "9605d29e4a84e43e6"
-my_api_key = "AIzaSyB8gaMkDkbAT-NTRXw346rFGNjeiGdWW88"
-my_cse_id = "02d90ac65942f44f3"
+# my_api_key = "AIzaSyB8gaMkDkbAT-NTRXw346rFGNjeiGdWW88"
+# my_cse_id = "02d90ac65942f44f3"
 
 db = mongo.db
 

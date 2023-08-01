@@ -18,7 +18,7 @@ class LoginController:
     def callback():
         code = request.form['code']
         if not code:
-            return 'Authorization code not received.', 400
+            return 'Authorization code not received.'
 
         data = {
             'code': code,
@@ -33,24 +33,8 @@ class LoginController:
             tokens = response.json()
             access_token = tokens.get('access_token')
             if access_token:
-                # return jsonify({'access_token': access_token})
-
-                userinfo_endpoint = 'https://misapi.cmu.ac.th/cmuitaccount/v1/api/cmuitaccount/basicinfo'
-
-                headers = {
-                    'Authorization': f'Bearer {access_token}',
-                    'Accept': 'application/json',
-                }
-
-                response = requests.get(userinfo_endpoint, headers=headers)
-                if response.status_code == 200:
-                    user_info = response.json()
-                    return jsonify(user_info)
-                else:
-                    return f'Failed to fetch user information: {response.status_code}', response.status_code
-            if not access_token:
-                return 'Access token not provided.', 401
-        return 'Failed to get access token.', 500
+                return jsonify({'access_token': access_token})
+        return 'Failed to get access token.'
 
     @staticmethod
     def userinfo():
