@@ -37,6 +37,20 @@ class UploadController:
 
         with zipfile.ZipFile(file_stream, 'r') as zip_file:
             student_ids = set()
+            question_text_dict = {}
+            for file_name in zip_file.namelist():
+                if '/' in file_name:
+                    folder_names = file_name.split('/', 1)[0]
+                    folder_names = folder_names.replace('.', '').replace(' ', '')
+                    if folder_names.startswith('Q'):
+                        student_id = file_name.split('/')[1].split()[0]
+                        if student_id == 'Question' or 'Question text' in file_name:
+                            inside_question = zip_file.read(file_name).decode('utf-8')
+                            inside_question = inside_question.lower()
+                            question_text = inside_question.strip()
+                            question_text_dict[folder_names] = question_text
+                        else:
+                            question_text_dict[folder_names] = ''
             for file_name in zip_file.namelist():
                 if '/' in file_name:
                     folder_names = file_name.split('/', 1)[0]
@@ -46,6 +60,7 @@ class UploadController:
                         name_parts = file_name.split("-")
                         if len(name_parts) >= 3:
                             student_name = name_parts[2].strip()
+
                         if student_id != 'Question' and 'Attempt1_textresponse' in file_name:
                             student_ids.add(student_id)
                             text_response = zip_file.read(file_name).decode('utf-8')
@@ -64,7 +79,9 @@ class UploadController:
                                 text_response = text_response.replace("don't", 'do not')
                             text_response = re.sub(r'[^a-zA-Z0-9 ]', ' ', text_response)
                             text_response = perform_spell_correction(text_response)
-                            question = Question(course_id=course_id, question=folder_names, student_name=student_name,
+                            question_text = question_text_dict.get(folder_names, '')
+                            question = Question(course_id=course_id, question=folder_names, question_text=question_text,
+                                                student_name=student_name,
                                                 student_id=student_id, answer=text_response)
                             question_dict = question.to_dict()
                             db.Question.insert_one(question_dict)
@@ -81,6 +98,7 @@ class UploadController:
                         question_data = {
                             'course_id': course_id,
                             'question': question,
+                            'question_text': question_text,
                             'student_name': 'null',
                             'student_id': student_id,
                             'answer': 'null'
@@ -101,6 +119,20 @@ class UploadController:
         file_stream = io.BytesIO(file.stream.read())
         with zipfile.ZipFile(file_stream, 'r') as zip_file:
             student_ids = set()
+            question_text_dict = {}
+            for file_name in zip_file.namelist():
+                if '/' in file_name:
+                    folder_names = file_name.split('/', 1)[0]
+                    folder_names = folder_names.replace('.', '').replace(' ', '')
+                    if folder_names.startswith('Q'):
+                        student_id = file_name.split('/')[1].split()[0]
+                        if student_id == 'Question' or 'Question text' in file_name:
+                            inside_question = zip_file.read(file_name).decode('utf-8')
+                            inside_question = inside_question.lower()
+                            question_text = inside_question.strip()
+                            question_text_dict[folder_names] = question_text
+                        else:
+                            question_text_dict[folder_names] = ''
             for file_name in zip_file.namelist():
                 if '/' in file_name:
                     folder_names = file_name.split('/', 1)[0]

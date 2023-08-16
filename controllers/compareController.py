@@ -9,14 +9,14 @@ from sklearn.metrics.pairwise import cosine_similarity
 from googleapiclient.discovery import build
 from app import spellchecker, mongo
 
-my_api_key = "AIzaSyCkAsCqOzds-oFWnasdQlrx2ql2s2RtjWk"
-my_cse_id = "042a0393f912b4ffa"
+# my_api_key = "AIzaSyCkAsCqOzds-oFWnasdQlrx2ql2s2RtjWk"
+# my_cse_id = "042a0393f912b4ffa"
 # my_api_key = "AIzaSyCmRvHOP1wJM5rUF9JMlpHgOA8yaaytae0"
 # my_cse_id = "03082958736eb4b86"
 # my_api_key = "AIzaSyCK2TB3yEzihRCiH9h17xUSbIZbR8nWbEk"
 # my_cse_id = "a454c0eb1bb48467b"
-# my_api_key = "AIzaSyAIusN4eOqS_GDypfgwtfT5TLC7DB96Ksk"
-# my_cse_id = "9605d29e4a84e43e6"
+my_api_key = "AIzaSyAIusN4eOqS_GDypfgwtfT5TLC7DB96Ksk"
+my_cse_id = "9605d29e4a84e43e6"
 # my_api_key = "AIzaSyB8gaMkDkbAT-NTRXw346rFGNjeiGdWW88"
 # my_cse_id = "02d90ac65942f44f3"
 
@@ -47,7 +47,8 @@ class CompareController:
         course_id = ObjectId(course_id)
         print(course_id)
         data = db.Question.find({'course_id': course_id})
-        df = pd.DataFrame(data, columns=['_id', 'course_id', 'question', 'student_id', 'student_name', 'answer'])
+        df = pd.DataFrame(data, columns=['_id', 'course_id', 'question', 'question_text', 'student_id', 'student_name',
+                                         'answer'])
         courses = []
         for course in data:
             courses.append({
@@ -66,6 +67,8 @@ class CompareController:
         prev_student_names = {}
         for question in list_q:
             keep = df[df['question'] == question]
+            question_text = keep['question_text'].iloc[0]
+            print(question_text)
             df_question = pd.DataFrame(data=keep)
             print(df_question)
             keep_id = keep['student_id']
@@ -99,13 +102,14 @@ class CompareController:
 
                 if student_name:
                     temp[student_id]['student_name'] = student_name
-                    comparison_data = df_bm[['student_name', 'answer']].to_dict(orient='records')
+                    comparison_data = df_bm[['student_name','question_text', 'answer']].to_dict(orient='records')
                     temp[student_id]['answers'].append({
                         'question': question,
                         'answer': answer,
                         'comparison_data': [entry for entry in comparison_data if
                                             entry['student_name'] != student_name],
-                        'percentage': percentage
+                        'percentage': percentage,
+                        'question_text': question_text
                     })
 
                 prev_student_names[student_id] = student_name
@@ -133,7 +137,7 @@ class CompareController:
         course_id = request.args.get('id')
         course_id = ObjectId(course_id)
         data = db.Question.find({'course_id': course_id})
-        df = pd.DataFrame(data, columns=['_id', 'course_id', 'question', 'student_id', 'student_name', 'answer'])
+        df = pd.DataFrame(data, columns=['_id', 'course_id', 'question','question_text', 'student_id', 'student_name', 'answer'])
         question = df['question']
         list_q = list(set(question))
         list_q = sorted(list_q, key=lambda x: int(x.split('-')[0][1:]))
@@ -145,6 +149,8 @@ class CompareController:
         vectorizer.fit(corpus)
         for question in list_q:
             keep = df[df['question'] == question]
+            question_text = keep['question_text'].iloc[0]
+            print(question_text)
             df_question = pd.DataFrame(data=keep)
             keep_id = keep['student_id']
             keep_id = sorted(keep_id, key=lambda x: x[:2] + x[2:])
@@ -191,7 +197,8 @@ class CompareController:
                     'question': question,
                     'answer': answer,
                     'comparison_data': df_bm[['snippet', 'link']].to_dict(orient='records'),
-                    'percentage': percentage
+                    'percentage': percentage,
+                    'question_text': question_text
                 })
 
                 prev_student_names[student_id] = student_name
@@ -212,6 +219,3 @@ class CompareController:
         }
 
         return response_data, 200
-
-
-
