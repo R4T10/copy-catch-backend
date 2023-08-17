@@ -21,15 +21,18 @@ with open(coding_words_file, 'r') as file:
 
 if __name__ == '__main__':
     from routes.upload_bp import UploadBlueprint
-
     app.register_blueprint(UploadBlueprint.upload_bp)
+
     from routes.compare_bp import CompareBlueprint
-
     app.register_blueprint(CompareBlueprint.compare_bp)
+
     from routes.course_bp import CourseBlueprint
-
     app.register_blueprint(CourseBlueprint.course_bp)
-    from routes.login_bp import LoginBlueprint
 
+    from routes.login_bp import LoginBlueprint
     app.register_blueprint(LoginBlueprint.login_bp)
+
+    from routes.student_bp import StudentBlueprint
+    app.register_blueprint(StudentBlueprint.student_bp)
+
     app.run(debug=True)

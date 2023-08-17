@@ -6,6 +6,7 @@ import re
 
 from app import spellchecker, mongo
 from models.question import Question
+from models.student import Student
 
 db = mongo.db
 
@@ -38,6 +39,7 @@ class UploadController:
         with zipfile.ZipFile(file_stream, 'r') as zip_file:
             student_ids = set()
             question_text_dict = {}
+            student_list = set()
             for file_name in zip_file.namelist():
                 if '/' in file_name:
                     folder_names = file_name.split('/', 1)[0]
@@ -85,9 +87,20 @@ class UploadController:
                                                 student_id=student_id, answer=text_response)
                             question_dict = question.to_dict()
                             db.Question.insert_one(question_dict)
+                            student_list.add((student_id, student_name))
+                            print(student_list)
                     else:
                         return jsonify({'message': 'Invalid format'}), 400
             all_questions = db.Question.distinct('question')
+
+            for student_p in student_list:
+                student_id_p = student_p[0]
+                student_name_p = student_p[1]
+                student = Student(course_id=course_id, student_id=student_id_p, student_name=student_name_p,
+                              student_mail='None')
+                student_dict = student.to_dict()
+                db.Student.insert_one(student_dict)
+
             for question in all_questions:
                 for student_id in student_ids:
                     query = {

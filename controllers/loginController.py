@@ -55,3 +55,5 @@ class LoginController:
             return jsonify(user_info)
         else:
             return f'Failed to fetch user information: {response.status_code}', response.status_code
+
+
