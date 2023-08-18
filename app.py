@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify, blueprints
 from flask_cors import CORS
+from flask_mail import Mail
 from flask_pymongo import PyMongo
 
 from spellchecker import SpellChecker
@@ -9,6 +10,14 @@ CORS(app, resources={r'/*': {'origins': '*'}})
 app.config["MONGO_URI"] = "mongodb://localhost:27017/Copy-Catch"
 mongo = PyMongo(app)
 db = mongo.db
+
+app.config['MAIL_SERVER'] = 'smtp-mail.outlook.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_DEBUG'] = True
+app.config['MAIL_USERNAME'] = 'copy_catch@hotmail.com'
+app.config['MAIL_PASSWORD'] = 'ccSE331!'
+mail = Mail(app)
 
 spellchecker = SpellChecker(language='en')
 
@@ -35,4 +44,6 @@ if __name__ == '__main__':
     from routes.student_bp import StudentBlueprint
     app.register_blueprint(StudentBlueprint.student_bp)
 
+    from routes.email_bp import EmailBlueprint
+    app.register_blueprint(EmailBlueprint.email_bp)
     app.run(debug=True)

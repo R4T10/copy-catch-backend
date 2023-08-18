@@ -96,8 +96,15 @@ class UploadController:
             for student_p in student_list:
                 student_id_p = student_p[0]
                 student_name_p = student_p[1]
-                student = Student(course_id=course_id, student_id=student_id_p, student_name=student_name_p,
-                              student_mail='None')
+                check_student = db.Student.find_one({'student_id': student_id_p})
+                if check_student:
+                    student_mail = check_student.get('student_mail')
+                    print(student_mail)
+                    student = Student(course_id=course_id, student_id=student_id_p, student_name=student_name_p,
+                                      student_mail=student_mail)
+                else:
+                    student = Student(course_id=course_id, student_id=student_id_p, student_name=student_name_p,
+                                      student_mail='None')
                 student_dict = student.to_dict()
                 db.Student.insert_one(student_dict)
 
