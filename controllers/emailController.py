@@ -15,7 +15,7 @@ class EmailController:
 
             if student:
                 student_email = student.get('student_mail')
-                if student_email:
+                if student_email != 'None':
                     subject = 'Test Email'
                     message = 'This is a test email sent using Flask-Mail.'
 
