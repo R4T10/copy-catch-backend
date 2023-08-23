@@ -9,7 +9,7 @@ class EmailController:
     def send_email():
         try:
             sender_email = 'copy_catch@hotmail.com'
-            receive_name = request.form['receive_name']
+            receive_name = request.form['receiver_name']
 
             student = db.Student.find_one({'student_name': receive_name})
 
