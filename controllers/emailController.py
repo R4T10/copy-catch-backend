@@ -16,19 +16,19 @@ class EmailController:
             if student:
                 student_email = student.get('student_mail')
                 if student_email != 'None':
-                    subject = 'Test Email'
-                    message = 'This is a test email sent using Flask-Mail.'
+                    subject = 'SE331 PJ'
+                    message = 'THis is from Krit'
 
                     msg = Message(subject, recipients=[student_email], sender=sender_email)
                     msg.body = message
 
                     mail.send(msg)
 
-                    return 'Email sent successfully', 200
-                else:
-                    return 'Student email not found', 404
-            else:
-                return 'Student not found', 404
+                    return jsonify({'message': 'Email sent successfully'}), 200
 
+                else:
+                    return jsonify({'message': 'Student email not found'}), 404
+            else:
+                return jsonify({'message': 'Student not found'}), 404
         except Exception as e:
             return f'Error sending email: {str(e)}', 500

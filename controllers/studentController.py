@@ -26,21 +26,14 @@ class StudentController:
 
     @staticmethod
     def update_email():
-        student_id = request.form['student_id']
         student_name = request.form['student_name']
         mail = request.form['mail']
-        course_id = request.form['course_id']
-        course_id = ObjectId(course_id)
-        print(course_id)
-        print(student_name)
-        print(student_id)
-        print(mail)
         result = db.Student.update_many(
-            {'student_id': student_id, 'student_name': student_name},
+            {'student_name': student_name},
             {'$set': {'student_mail': mail}}
         )
 
         if result.modified_count > 0:
-            return 'Update success', 200
+            return jsonify({'message': 'Update success'}), 200
         else:
-            return 'Student not found', 404
+            return jsonify({'message': 'Student not found'}), 404

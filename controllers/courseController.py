@@ -41,7 +41,8 @@ class CourseController:
         course_id = request.form.get('id')
         db.Courses.delete_one({'_id': ObjectId(course_id)})
         db.Question.delete_many({'course_id': ObjectId(course_id)})
-        return 'Delete success', 200
+        return jsonify({'message': 'Delete success'}), 200
+
 
     @staticmethod
     def edit_course():
@@ -62,4 +63,4 @@ class CourseController:
                 'professor': professor
             }}
         )
-        return 'Edit success', 200
+        return jsonify({'message': 'Edit success'}), 200

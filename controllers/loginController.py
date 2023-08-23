@@ -14,6 +14,7 @@ class LoginController:
     @staticmethod
     def login():
         return 'https://oauth.cmu.ac.th/v1/Authorize.aspx?response_type=code&client_id=udnnChw9fh77821R00WKBrCHNFhPs0FPuDfZJ44v&redirect_uri=http://localhost:3000/course_list&scope=cmuitaccount.basicinfo'
+
     @staticmethod
     def callback():
         code = request.form['code']
@@ -34,7 +35,7 @@ class LoginController:
             access_token = tokens.get('access_token')
             if access_token:
                 return jsonify({'access_token': access_token})
-        return 'Failed to get access token.'
+        return jsonify({'message': 'Failed to get access token.'})
 
     @staticmethod
     def userinfo():
@@ -54,6 +55,4 @@ class LoginController:
             user_info = response.json()
             return jsonify(user_info)
         else:
-            return f'Failed to fetch user information: {response.status_code}', response.status_code
-
-
+            return jsonify({'message': 'Failed to fetch user information'}), 404
