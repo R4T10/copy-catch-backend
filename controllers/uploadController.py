@@ -180,7 +180,9 @@ class UploadController:
                                 text_response = text_response.replace("don't", 'do not')
                             text_response = re.sub(r'[^a-zA-Z0-9 ]', ' ', text_response)
                             text_response = perform_spell_correction(text_response)
-                            question = Question(course_id=course_id, question=folder_names, student_name=student_name,
+                            question_text = question_text_dict.get(folder_names, '')
+                            question = Question(course_id=course_id, question=folder_names, question_text=question_text,
+                                                student_name=student_name,
                                                 student_id=student_id, answer=text_response)
                             question_dict = question.to_dict()
                             db.Question.insert_one(question_dict)
@@ -197,6 +199,7 @@ class UploadController:
                         question_data = {
                             'course_id': course_id,
                             'question': question,
+                            'question_text': question_text,
                             'student_name': 'null',
                             'student_id': student_id,
                             'answer': 'null'
