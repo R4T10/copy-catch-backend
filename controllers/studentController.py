@@ -7,6 +7,7 @@ class StudentController:
     @staticmethod
     def get_student_list():
         course_id = request.args.get('id')
+        print(course_id)
         course_id = ObjectId(course_id)
         data = db.Student.find({'course_id': course_id})
         print(data)
@@ -27,7 +28,9 @@ class StudentController:
     @staticmethod
     def update_email():
         student_name = request.form['student_name']
+        print(student_name)
         mail = request.form['mail']
+        print(mail)
         result = db.Student.update_many(
             {'student_name': student_name},
             {'$set': {'student_mail': mail}}

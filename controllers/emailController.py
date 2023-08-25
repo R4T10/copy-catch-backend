@@ -17,7 +17,7 @@ class EmailController:
                 student_email = student.get('student_mail')
                 if student_email != 'None':
                     subject = 'SE331 PJ'
-                    message = 'THis is from Krit'
+                    message = 'THis is from Krit212'
 
                     msg = Message(subject, recipients=[student_email], sender=sender_email)
                     msg.body = message

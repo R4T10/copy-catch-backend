@@ -47,6 +47,8 @@ class CourseController:
     @staticmethod
     def edit_course():
         id = request.form.get('id')
+
+        print(request.form['id'])
         id = ObjectId(id)
         course_id = request.form['course_id']
         course_name = request.form['course_name']

@@ -136,10 +136,19 @@ class UploadController:
         course_id = request.form['id']
         course_id = ObjectId(course_id)
         db.Question.delete_many({'course_id': ObjectId(course_id)})
+        db.Student.delete_many({'course_id': ObjectId(course_id)})
         file_stream = io.BytesIO(file.stream.read())
+
+        try:
+            with zipfile.ZipFile(file.stream) as zip_file:
+                pass
+        except zipfile.BadZipFile:
+            return jsonify({'message': 'Invalid file type'}), 400
+
         with zipfile.ZipFile(file_stream, 'r') as zip_file:
             student_ids = set()
             question_text_dict = {}
+            student_list = set()
             for file_name in zip_file.namelist():
                 if '/' in file_name:
                     folder_names = file_name.split('/', 1)[0]
@@ -185,10 +194,26 @@ class UploadController:
                                                 student_name=student_name,
                                                 student_id=student_id, answer=text_response)
                             question_dict = question.to_dict()
+                            student_list.add((student_id, student_name))
                             db.Question.insert_one(question_dict)
                     else:
                         return jsonify({'message': 'Invalid format'}), 400
             all_questions = db.Question.distinct('question')
+            for student_p in student_list:
+                student_id_p = student_p[0]
+                student_name_p = student_p[1]
+                check_student = db.Student.find_one({'student_id': student_id_p})
+                if check_student:
+                    student_mail = check_student.get('student_mail')
+                    print(student_mail)
+                    student = Student(course_id=course_id, student_id=student_id_p, student_name=student_name_p,
+                                      student_mail=student_mail)
+                else:
+                    student = Student(course_id=course_id, student_id=student_id_p, student_name=student_name_p,
+                                      student_mail='None')
+                student_dict = student.to_dict()
+                db.Student.insert_one(student_dict)
+
             for question in all_questions:
                 for student_id in student_ids:
                     query = {
