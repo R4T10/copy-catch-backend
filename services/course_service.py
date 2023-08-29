@@ -8,8 +8,9 @@ from models.course import Course
 class CourseService:
     @staticmethod
     def get_course_list():
-        professor = request.form['name']
-        data = db.Courses.find({'professor': professor})
+        professor_email = request.form['professor_email']
+        print(request.form)
+        data = db.Courses.find({'professor_email': professor_email})
         courses = []
         for course in data:
             courses.append({
@@ -18,7 +19,7 @@ class CourseService:
                 'course_name': course['course_name'],
                 'year': course['year'],
                 'examination': course['examination'],
-                'professor': course['professor'],
+                'professor_email': course['professor_email'],
                 'file': course['file']
             })
         return jsonify(courses), 200
@@ -29,10 +30,10 @@ class CourseService:
         course_name = request.form['course_name']
         year = request.form['year']
         examination = request.form['examination']
-        professor = request.form['professor']
+        professor_email = request.form['professor_email']
         file = False
         course = Course(course_id=course_id, course_name=course_name, year=year,
-                        examination=examination, professor=professor, file=file)
+                        examination=examination, professor_email=professor_email, file=file)
         question_dict = course.to_dict()
         db.Courses.insert_one(question_dict)
         return jsonify({'message': 'Course added successfully'}), 200
@@ -54,7 +55,7 @@ class CourseService:
         course_name = request.form['course_name']
         year = request.form['year']
         examination = request.form['examination']
-        professor = request.form['professor']
+        professor_email = request.form['professor_email']
         db.Courses.update_one(
             {'_id': id},
             {'$set': {
@@ -62,7 +63,7 @@ class CourseService:
                 'course_name': course_name,
                 'year': year,
                 'examination': examination,
-                'professor': professor
+                'professor_email': professor_email
             }}
         )
         return jsonify({'message': 'Edit success'}), 200
