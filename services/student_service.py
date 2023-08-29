@@ -27,12 +27,12 @@ class StudentService:
 
     @staticmethod
     def update_email():
-        student_name = request.form['student_name']
-        print(student_name)
+        student_id = request.form['student_id']
+        print(student_id)
         mail = request.form['mail']
         print(mail)
         result = db.Student.update_many(
-            {'student_name': student_name},
+            {'student_id': student_id},
             {'$set': {'student_mail': mail}}
         )
 

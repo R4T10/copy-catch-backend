@@ -9,15 +9,15 @@ class EmailService:
     def send_email():
         try:
             sender_email = 'copy_catch@hotmail.com'
-            receive_name = request.form['receiver_name']
+            student_id = request.form['student_id']
 
-            student = db.Student.find_one({'student_name': receive_name})
+            student = db.Student.find_one({'student_id': student_id})
 
             if student:
                 student_email = student.get('student_mail')
                 if student_email != 'None':
                     subject = 'SE331 PJ'
-                    message = 'THis is from Krit212'
+                    message = 'THis is from Krit2121'
 
                     msg = Message(subject, recipients=[student_email], sender=sender_email)
                     msg.body = message
