@@ -102,7 +102,7 @@ class CompareController:
 
                 if student_name:
                     temp[student_id]['student_name'] = student_name
-                    comparison_data = df_bm[['student_name','question_text', 'answer']].to_dict(orient='records')
+                    comparison_data = df_bm[['student_name','question_text', 'answer','student_id','question']].to_dict(orient='records')
                     temp[student_id]['answers'].append({
                         'question': question,
                         'answer': answer,
