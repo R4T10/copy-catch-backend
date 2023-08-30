@@ -16,8 +16,13 @@ class EmailService:
             if student:
                 student_email = student.get('student_mail')
                 if student_email != 'None':
-                    subject = 'SE331 PJ'
-                    message = 'THis is from Krit2121'
+                    subject = 'Copy-Catch detected plagiarism from your answer'
+                    message = ('Dear studentname, ' \
+                               'Copy-Catch detected plagiarism from your answer of courseid coursename examinationtype exam.' \
+                               '' \
+                               'You are asked to contact Professor. professorname to discuss about this matter.' \
+                               '' \
+                               'Yours sincerely,')
 
                     msg = Message(subject, recipients=[student_email], sender=sender_email)
                     msg.body = message
