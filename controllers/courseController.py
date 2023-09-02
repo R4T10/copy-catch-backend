@@ -11,8 +11,11 @@ class CourseController:
     @staticmethod
     def addCourse():
         course_service = CourseService()
-        response_data, status_code = course_service.adding_course()
-        return response_data, status_code
+        try:
+            response_data, status_code = course_service.adding_course()
+            return response_data, status_code
+        except Exception as e:
+            return str(e), 409
 
     @staticmethod
     def deleteCourse():
@@ -23,5 +26,8 @@ class CourseController:
     @staticmethod
     def editCourse():
         course_service = CourseService()
-        response_data, status_code = course_service.edit_course()
-        return response_data, status_code
+        try:
+            response_data, status_code = course_service.edit_course()
+            return response_data, status_code
+        except Exception as e:
+            return str(e), 409

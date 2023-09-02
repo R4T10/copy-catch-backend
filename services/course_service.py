@@ -32,6 +32,14 @@ class CourseService:
         examination = request.form['examination']
         professor_email = request.form['professor_email']
         file = False
+        existing_course = db.Courses.find_one({
+            'course_id': course_id,
+            'year': year,
+            'examination': examination
+        })
+
+        if existing_course:
+            raise ValueError("Duplicate course found in the database")
         course = Course(course_id=course_id, course_name=course_name, year=year,
                         examination=examination, professor_email=professor_email, file=file)
         question_dict = course.to_dict()
@@ -48,7 +56,6 @@ class CourseService:
     @staticmethod
     def edit_course():
         id = request.form.get('id')
-
         print(request.form['id'])
         id = ObjectId(id)
         course_id = request.form['course_id']
@@ -56,6 +63,14 @@ class CourseService:
         year = request.form['year']
         examination = request.form['examination']
         professor_email = request.form['professor_email']
+        existing_course = db.Courses.find_one({
+            'course_id': course_id,
+            'year': year,
+            'examination': examination
+        })
+
+        if existing_course:
+            raise ValueError("Duplicate course found in the database")
         db.Courses.update_one(
             {'_id': id},
             {'$set': {
