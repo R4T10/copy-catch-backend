@@ -102,7 +102,8 @@ class CompareService:
 
                 if student_name:
                     temp[student_id]['student_name'] = student_name
-                    comparison_data = df_bm[['student_name','question_text', 'answer','student_id','question']].to_dict(orient='records')
+                    comparison_data = df_bm[
+                        ['student_name', 'question_text', 'answer', 'student_id', 'question']].to_dict(orient='records')
                     temp[student_id]['answers'].append({
                         'question': question,
                         'answer': answer,
@@ -137,7 +138,8 @@ class CompareService:
         course_id = request.args.get('id')
         course_id = ObjectId(course_id)
         data = db.Question.find({'course_id': course_id})
-        df = pd.DataFrame(data, columns=['_id', 'course_id', 'question','question_text', 'student_id', 'student_name', 'answer'])
+        df = pd.DataFrame(data, columns=['_id', 'course_id', 'question', 'question_text', 'student_id', 'student_name',
+                                         'answer'])
         question = df['question']
         list_q = list(set(question))
         list_q = sorted(list_q, key=lambda x: int(x.split('-')[0][1:]))
@@ -187,8 +189,6 @@ class CompareService:
 
                 if student_id not in temp:
                     temp[student_id] = {'student_id': student_id, 'answers': []}
-
-                # Retrieve the previous student name
                 prev_name = prev_student_names.get(student_id, None)
                 if prev_name:
                     temp[student_id]['student_name'] = prev_name
