@@ -11,5 +11,8 @@ class StudentController:
     @staticmethod
     def updateEmail():
         student_service = StudentService()
-        response_data, status_code = student_service.update_email()
-        return response_data, status_code
+        try:
+            response_data, status_code = student_service.update_email()
+            return response_data, status_code
+        except Exception as e:
+            return str(e), 404

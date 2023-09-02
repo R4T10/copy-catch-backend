@@ -39,4 +39,4 @@ class StudentService:
         if result.modified_count > 0:
             return jsonify({'message': 'Update success'}), 200
         else:
-            return jsonify({'message': 'Student not found'}), 404
+            raise Exception('Student not found')
