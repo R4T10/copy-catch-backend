@@ -12,6 +12,7 @@ class CourseService:
         print(request.form)
         data = db.Courses.find({'professor_email': professor_email})
         courses = []
+
         for course in data:
             courses.append({
                 'id': str(course['_id']),
@@ -44,14 +45,22 @@ class CourseService:
                         examination=examination, professor_email=professor_email, file=file)
         question_dict = course.to_dict()
         db.Courses.insert_one(question_dict)
-        return jsonify({'message': 'Course added successfully'}), 200
+        return jsonify({'message': 'Add success'}), 200
 
     @staticmethod
     def delete_course():
         course_id = request.form.get('id')
+        id = ObjectId(course_id)
+        existing_course = db.Courses.find_one({
+            '_id': id,
+        })
+        if not existing_course:
+            raise Exception("Course not found")
+
         db.Courses.delete_one({'_id': ObjectId(course_id)})
         db.Question.delete_many({'course_id': ObjectId(course_id)})
         return jsonify({'message': 'Delete success'}), 200
+
 
     @staticmethod
     def edit_course():

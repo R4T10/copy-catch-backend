@@ -20,8 +20,11 @@ class CourseController:
     @staticmethod
     def deleteCourse():
         course_service = CourseService()
-        response_data, status_code = course_service.delete_course()
-        return response_data, status_code
+        try:
+            response_data, status_code = course_service.delete_course()
+            return response_data, status_code
+        except Exception as e:
+            return str(e), 404
 
     @staticmethod
     def editCourse():

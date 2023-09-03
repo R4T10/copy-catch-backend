@@ -34,7 +34,7 @@ class UploadService:
             with zipfile.ZipFile(file.stream) as zip_file:
                 pass
         except zipfile.BadZipFile:
-            return jsonify({'message': 'Invalid file type'}), 400
+            raise TypeError("Invalid file type")
 
         with zipfile.ZipFile(file_stream, 'r') as zip_file:
             student_ids = set()
@@ -90,7 +90,8 @@ class UploadService:
                             student_list.add((student_id, student_name))
                             print(student_list)
                     else:
-                        return jsonify({'message': 'Invalid format'}), 400
+                        print('Invalid format')
+                        raise ValueError("Invalid file format")
             all_questions = db.Question.distinct('question')
 
             for student_p in student_list:
@@ -143,7 +144,8 @@ class UploadService:
             with zipfile.ZipFile(file.stream) as zip_file:
                 pass
         except zipfile.BadZipFile:
-            return jsonify({'message': 'Invalid file type'}), 400
+            print('Invalid file type')
+            raise TypeError("Invalid file type")
 
         with zipfile.ZipFile(file_stream, 'r') as zip_file:
             student_ids = set()
@@ -197,7 +199,8 @@ class UploadService:
                             student_list.add((student_id, student_name))
                             db.Question.insert_one(question_dict)
                     else:
-                        return jsonify({'message': 'Invalid format'}), 400
+                        print('Invalid format')
+                        raise ValueError("Invalid file format")
             all_questions = db.Question.distinct('question')
             for student_p in student_list:
                 student_id_p = student_p[0]

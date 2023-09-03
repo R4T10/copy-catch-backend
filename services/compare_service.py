@@ -59,6 +59,8 @@ class CompareService:
                 'answer': course['answer']
             })
         print(courses)
+
+        data_list = list(data)
         question = df['question']
         list_q = list(set(question))
         list_q = sorted(list_q, key=lambda x: int(x.split('-')[0][1:]))
@@ -140,6 +142,8 @@ class CompareService:
         data = db.Question.find({'course_id': course_id})
         df = pd.DataFrame(data, columns=['_id', 'course_id', 'question', 'question_text', 'student_id', 'student_name',
                                          'answer'])
+
+        data_list = list(data)
         question = df['question']
         list_q = list(set(question))
         list_q = sorted(list_q, key=lambda x: int(x.split('-')[0][1:]))
