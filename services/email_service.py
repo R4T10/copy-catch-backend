@@ -9,19 +9,27 @@ class EmailService:
     def send_email():
         sender_email = 'copy_catch@hotmail.com'
         student_id = request.form['student_id']
-
+        course_id = request.form['course_id']
+        course_name = request.form['course_name']
+        examination = request.form['examination']
+        print(request.form)
         student = db.Student.find_one({'student_id': student_id})
-
+        print(student)
         if not student:
+            print('Student not found')
             raise Exception('Student not found')
 
         student_email = student.get('student_mail')
-
+        student_name = student.get('student_name')
         if student_email == 'None':
+            print('Student email not found')
             raise Exception('Student email not found')
 
-        subject = 'SE331 PJ'
-        message = 'This is from Krit2121'
+        subject = 'Copy-Catch detected plagiarism from your answer'
+        message = f'Dear {student_name}, \n\n' \
+                  f'Copy-Catch detected plagiarism from your answer of {course_id} {course_name} {examination} exam.\n\n' \
+                  f'You are asked to contact the professor to discuss this matter.\n\n' \
+                  'Yours sincerely,'
 
         msg = Message(subject, recipients=[student_email], sender=sender_email)
         msg.body = message
