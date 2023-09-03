@@ -9,4 +9,4 @@ class EmailController:
             response_data, status_code = email_service.send_email()
             return response_data, status_code
         except Exception as e:
-            return str(e), 404
+            return str(e), 409
