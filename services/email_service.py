@@ -15,10 +15,6 @@ class EmailService:
         print(request.form)
         student = db.Student.find_one({'student_id': student_id})
         print(student)
-        if not student:
-            print('Student not found')
-            raise Exception('Student not found')
-
         student_email = student.get('student_mail')
         student_name = student.get('student_name')
         if student_email == 'None':

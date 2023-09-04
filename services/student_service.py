@@ -35,7 +35,6 @@ class StudentService:
             {'student_id': student_id},
             {'$set': {'student_mail': mail}}
         )
-
         if result.modified_count > 0:
             return jsonify({'message': 'Update success'}), 200
         else:

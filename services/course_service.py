@@ -45,7 +45,16 @@ class CourseService:
                         examination=examination, professor_email=professor_email, file=file)
         question_dict = course.to_dict()
         db.Courses.insert_one(question_dict)
-        return jsonify({'message': 'Add success'}), 200
+        added_course = db.Courses.find_one({
+            'course_id': course_id,
+            'course_name':course_name,
+            'year': year,
+            'examination': examination
+        })
+        print(added_course)
+        if added_course:
+            added_course['_id'] = str(added_course['_id'])
+        return jsonify(added_course), 200
 
     @staticmethod
     def delete_course():
@@ -60,7 +69,6 @@ class CourseService:
         db.Courses.delete_one({'_id': ObjectId(course_id)})
         db.Question.delete_many({'course_id': ObjectId(course_id)})
         return jsonify({'message': 'Delete success'}), 200
-
 
     @staticmethod
     def edit_course():
@@ -90,4 +98,17 @@ class CourseService:
                 'professor_email': professor_email
             }}
         )
-        return jsonify({'message': 'Edit success'}), 200
+
+        after_add = db.Courses.find_one({
+            'course_id': course_id,
+            'course_name': course_name,
+            'year': year,
+            'examination': examination,
+            'professor_email': professor_email
+        })
+
+        if after_add:
+            after_add['_id'] = str(after_add['_id'])
+
+        return jsonify(after_add), 200
+

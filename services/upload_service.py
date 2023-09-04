@@ -129,7 +129,8 @@ class UploadService:
                 {'_id': ObjectId(course_id)},
                 {'$set': {'file': True}}
             )
-        return jsonify({'message': 'Upload successful'}), 200
+
+        return jsonify({'message': 'Upload success'}), 200
 
     @staticmethod
     def reupload():
@@ -237,4 +238,4 @@ class UploadService:
                 {'_id': ObjectId(course_id)},
                 {'$set': {'file': True}}
             )
-        return jsonify({'message': 'Re-upload successful'}), 200
+        return jsonify({'message': 'Upload success'}), 200
