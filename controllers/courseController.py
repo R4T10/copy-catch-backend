@@ -14,7 +14,7 @@ class CourseController:
         try:
             response_data, status_code = course_service.adding_course()
             return response_data, status_code
-        except Exception as e:
+        except ValueError as e:
             return str(e), 409
 
     @staticmethod
@@ -32,5 +32,7 @@ class CourseController:
         try:
             response_data, status_code = course_service.edit_course()
             return response_data, status_code
+        except ValueError as e:
+            return str(e), 409
         except Exception as e:
             return str(e), 409

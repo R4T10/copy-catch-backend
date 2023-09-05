@@ -23,6 +23,7 @@ class CourseService:
                 'professor_email': course['professor_email'],
                 'file': course['file']
             })
+
         return jsonify(courses), 200
 
     @staticmethod
@@ -47,7 +48,7 @@ class CourseService:
         db.Courses.insert_one(question_dict)
         added_course = db.Courses.find_one({
             'course_id': course_id,
-            'course_name':course_name,
+            'course_name': course_name,
             'year': year,
             'examination': examination
         })
@@ -80,6 +81,11 @@ class CourseService:
         year = request.form['year']
         examination = request.form['examination']
         professor_email = request.form['professor_email']
+        check_id = db.Courses.find_one({
+            '_id': id,
+        })
+        if not check_id:
+            raise Exception("Can't find this Object ID in database")
         existing_course = db.Courses.find_one({
             'course_id': course_id,
             'year': year,
@@ -88,6 +94,7 @@ class CourseService:
 
         if existing_course:
             raise ValueError("Duplicate course found in the database")
+
         db.Courses.update_one(
             {'_id': id},
             {'$set': {
@@ -111,4 +118,3 @@ class CourseService:
             after_add['_id'] = str(after_add['_id'])
 
         return jsonify(after_add), 200
-
