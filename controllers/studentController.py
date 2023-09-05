@@ -5,8 +5,11 @@ class StudentController:
     @staticmethod
     def getStudentList():
         student_service = StudentService()
-        response_data, status_code = student_service.get_student_list()
-        return response_data, status_code
+        try:
+            response_data, status_code = student_service.get_student_list()
+            return response_data, status_code
+        except Exception as e:
+            return str(e), 409
 
     @staticmethod
     def updateEmail():
