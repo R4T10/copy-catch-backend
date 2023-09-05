@@ -10,6 +10,9 @@ class StudentService:
         print(course_id)
         course_id = ObjectId(course_id)
         data = db.Student.find({'course_id': course_id})
+        check_course = db.Courses.find({'_id': course_id})
+        if not check_course:
+            raise Exception("Can't find this Object ID in database")
         print(data)
         students = []
         for student in data:

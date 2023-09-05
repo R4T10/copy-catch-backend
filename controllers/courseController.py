@@ -24,7 +24,7 @@ class CourseController:
             response_data, status_code = course_service.delete_course()
             return response_data, status_code
         except Exception as e:
-            return str(e), 404
+            return str(e), 409
 
     @staticmethod
     def editCourse():
