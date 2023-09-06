@@ -9,10 +9,11 @@ class StudentService:
         course_id = request.args.get('id')
         print(course_id)
         course_id = ObjectId(course_id)
-        data = db.Student.find({'course_id': course_id})
-        check_course = db.Courses.find({'_id': course_id})
+        check_course = db.Courses.find_one({'_id': course_id})
         if not check_course:
             raise Exception("Can't find this Object ID in database")
+
+        data = db.Student.find({'course_id': course_id})
         print(data)
         students = []
         for student in data:
