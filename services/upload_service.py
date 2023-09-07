@@ -90,7 +90,6 @@ class UploadService:
                             student_list.add((student_id, student_name))
                             print(student_list)
                     else:
-                        print('Invalid format')
                         raise ValueError("Invalid file format")
             all_questions = db.Question.distinct('question')
 
@@ -100,7 +99,6 @@ class UploadService:
                 check_student = db.Student.find_one({'student_id': student_id_p})
                 if check_student:
                     student_mail = check_student.get('student_mail')
-                    print(student_mail)
                     student = Student(course_id=course_id, student_id=student_id_p, student_name=student_name_p,
                                       student_mail=student_mail)
                 else:
@@ -145,7 +143,6 @@ class UploadService:
             with zipfile.ZipFile(file.stream) as zip_file:
                 pass
         except zipfile.BadZipFile:
-            print('Invalid file type')
             raise TypeError("Invalid file type")
 
         with zipfile.ZipFile(file_stream, 'r') as zip_file:
@@ -200,7 +197,6 @@ class UploadService:
                             student_list.add((student_id, student_name))
                             db.Question.insert_one(question_dict)
                     else:
-                        print('Invalid format')
                         raise ValueError("Invalid file format")
             all_questions = db.Question.distinct('question')
             for student_p in student_list:
@@ -209,7 +205,6 @@ class UploadService:
                 check_student = db.Student.find_one({'student_id': student_id_p})
                 if check_student:
                     student_mail = check_student.get('student_mail')
-                    print(student_mail)
                     student = Student(course_id=course_id, student_id=student_id_p, student_name=student_name_p,
                                       student_mail=student_mail)
                 else:

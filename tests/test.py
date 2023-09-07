@@ -255,7 +255,6 @@ class TestApp(unittest.TestCase):
             'examination': 'Final',
         }
 
-
         response = self.app.post('/send_email', data=data)
 
         self.assertEqual(response.status_code, 409)
@@ -289,13 +288,21 @@ class TestApp(unittest.TestCase):
         course_id = '74f37dd289f4ae1671419f40'
         response = self.app.get(f'/get_student_list?id={course_id}')
         self.assertEqual(response.status_code, 409)
+
+        expected_message = b"Can't find this Object ID in database"
+        self.assertEqual(response.data, expected_message)
         print(response.data)
 
     def test_update_student_email_success(self):
         student_id = {'student_id': '632115001',
                       'mail': 'test@cmu.ac.th'}
         response = self.app.post('/update_email', data=student_id)
+
         self.assertEqual(response.status_code, 200)
+
+        response_data = response.get_json()
+        expected_message = {'message': 'Update success'}
+        self.assertEqual(response_data, expected_message)
         print(response.data)
 
     def test_update_student_email_unsuccess_cant_find_student_id(self):
@@ -303,6 +310,9 @@ class TestApp(unittest.TestCase):
                       'mail': 'test@cmu.ac.th'}
         response = self.app.post('/update_email', data=student_id)
         self.assertEqual(response.status_code, 409)
+
+        expected_message = b"Student not found"
+        self.assertEqual(response.data, expected_message)
         print(response.data)
 
     def test_reupload_success(self):
@@ -317,6 +327,11 @@ class TestApp(unittest.TestCase):
         response = self.app.post('/reupload', data=data)
 
         self.assertEqual(response.status_code, 200)
+
+        response_data = response.get_json()
+        expected_message = {'message': 'Upload success'}
+        self.assertEqual(response_data, expected_message)
+        print(response.data)
         print(response.data)
 
     def test_reupload_unsuccess_wrong_format(self):
@@ -331,6 +346,9 @@ class TestApp(unittest.TestCase):
         response = self.app.post('/reupload', data=data)
 
         self.assertEqual(response.status_code, 400)
+
+        expected_message = b"Invalid file format"
+        self.assertEqual(response.data, expected_message)
         print(response.data)
 
     def test_reupload_unsuccess_wrong_type(self):
@@ -345,6 +363,9 @@ class TestApp(unittest.TestCase):
         response = self.app.post('/reupload', data=data)
 
         self.assertEqual(response.status_code, 400)
+
+        expected_message = b"Invalid file type"
+        self.assertEqual(response.data, expected_message)
         print(response.data)
 
 
