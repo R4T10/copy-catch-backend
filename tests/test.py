@@ -1,7 +1,8 @@
 import unittest
 
 from flask_mail import Mail
-
+import io
+import zipfile
 from services.course_service import CourseService
 from bson import ObjectId
 from flask import jsonify, request
@@ -42,7 +43,7 @@ def deleteCourse():
         response_data, status_code = course_service.delete_course()
         return response_data, status_code
     except Exception as e:
-        return str(e), 404
+        return str(e), 409
 
 
 @app.route('/edit_course', methods=['POST'])
@@ -130,6 +131,7 @@ class TestApp(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
         response_data = response.get_json()
+
         print(response_data)
 
     def test_add_course_unsuccess_course_duplicated(self):
@@ -144,11 +146,15 @@ class TestApp(unittest.TestCase):
         response = self.app.post('/adding_course', data=course)
 
         self.assertEqual(response.status_code, 409)
+
+        expected_message = b'Duplicate course found in the database'
+        self.assertEqual(response.data, expected_message)
+
         print(response.data)
 
     def test_edit_course_success(self):
         course = {
-            'id': '64f87ddc8944a81671419f40',
+            'id': '64f98bba3e3e7824b9af475e',
             'course_id': '890012',
             'course_name': 'TEST',
             'year': '2021',
@@ -174,11 +180,14 @@ class TestApp(unittest.TestCase):
         response = self.app.post('/edit_course', data=course)
 
         self.assertEqual(response.status_code, 409)
+
+        expected_message = b"Can't find this Object ID in database"
+        self.assertEqual(response.data, expected_message)
         print(response.data)
 
     def test_edit_course_unsuccess_course_duplicated(self):
         course = {
-            'id': '64f87ddc8944a81671419f40',
+            'id': '64f98bba3e3e7824b9af475e',
             'course_id': '890012',
             'course_name': 'TEST',
             'year': '2021',
@@ -189,11 +198,41 @@ class TestApp(unittest.TestCase):
         response = self.app.post('/edit_course', data=course)
 
         self.assertEqual(response.status_code, 409)
+
+        expected_message = b"Duplicate course found in the database"
+        self.assertEqual(response.data, expected_message)
+        print(response.data)
+
+    def test_delete_course_success(self):
+        course = {
+            'id': '64f989c804fc9f0939ee940c',
+        }
+
+        response = self.app.post('/delete_course', data=course)
+
+        self.assertEqual(response.status_code, 200)
+
+        response_data = response.get_json()
+        expected_message = {'message': 'Delete success'}
+        self.assertEqual(response_data, expected_message)
+        print(response.data)
+
+    def test_delete_course_unsuccess_course_not_found(self):
+        course = {
+            'id': '64f989c804fc9f0939ee940c',
+        }
+
+        response = self.app.post('/delete_course', data=course)
+
+        self.assertEqual(response.status_code, 409)
+
+        expected_message = b'Course not found'
+        self.assertEqual(response.data, expected_message)
         print(response.data)
 
     def test_send_email_success(self):
         data = {
-            'student_id': '622115513',
+            'student_id': '522115001',
             'course_id': '890012',
             'course_name': 'TEST',
             'examination': 'Final',
@@ -202,6 +241,10 @@ class TestApp(unittest.TestCase):
         response = self.app.post('/send_email', data=data)
 
         self.assertEqual(response.status_code, 200)
+
+        response_data = response.get_json()
+        expected_message = {'message': 'Email sent successfully'}
+        self.assertEqual(response_data, expected_message)
         print(response.data)
 
     def test_send_email_unsuccess_student_not_found(self):
@@ -212,14 +255,17 @@ class TestApp(unittest.TestCase):
             'examination': 'Final',
         }
 
+
         response = self.app.post('/send_email', data=data)
 
         self.assertEqual(response.status_code, 409)
+        expected_message = b'Student not found'
+        self.assertEqual(response.data, expected_message)
         print(response.data)
 
     def test_send_email_unsuccess_student_email_not_found(self):
         data = {
-            'student_id': '632115501',
+            'student_id': '522115002',
             'course_id': '890012',
             'course_name': 'TEST',
             'examination': 'Final',
@@ -228,6 +274,9 @@ class TestApp(unittest.TestCase):
         response = self.app.post('/send_email', data=data)
 
         self.assertEqual(response.status_code, 409)
+
+        expected_message = b'Student email not found'
+        self.assertEqual(response.data, expected_message)
         print(response.data)
 
     def test_get_student_list_success(self):
@@ -257,8 +306,45 @@ class TestApp(unittest.TestCase):
         print(response.data)
 
     def test_reupload_success(self):
+        with open('../utils/Dev-test.zip', 'rb') as zip_file:
+            zip_content = zip_file.read()
+
+        data = {
+            'file': (io.BytesIO(zip_content), 'Dev-test.zip'),
+            'id': '64f6d3283f8065124d93d61b'
+        }
+
         response = self.app.post('/reupload', data=data)
-        self.assertEqual(response.status_code, 409)
+
+        self.assertEqual(response.status_code, 200)
+        print(response.data)
+
+    def test_reupload_unsuccess_wrong_format(self):
+        with open('../utils/student_answer.zip', 'rb') as zip_file:
+            zip_content = zip_file.read()
+
+        data = {
+            'file': (io.BytesIO(zip_content), 'student_answer.zip'),
+            'id': '64f6d3283f8065124d93d61b'
+        }
+
+        response = self.app.post('/reupload', data=data)
+
+        self.assertEqual(response.status_code, 400)
+        print(response.data)
+
+    def test_reupload_unsuccess_wrong_type(self):
+        with open('../utils/student_answer.pdf', 'rb') as zip_file:
+            zip_content = zip_file.read()
+
+        data = {
+            'file': (io.BytesIO(zip_content), 'student_answer.pdf'),
+            'id': '64f6d3283f8065124d93d61b'
+        }
+
+        response = self.app.post('/reupload', data=data)
+
+        self.assertEqual(response.status_code, 400)
         print(response.data)
 
 

@@ -21,8 +21,8 @@ mail = Mail(app)
 
 spellchecker = SpellChecker(language='en')
 
-coding_words_file = 'D:/Compo-work/copy-catch-backend/assets/coding_words.txt'
-
+# coding_words_file = 'D:/Compo-work/copy-catch-backend/assets/coding_words.txt'
+coding_words_file = 'E:/Compo-work/copy-catch-backend/assets/coding_words.txt'
 with open(coding_words_file, 'r') as file:
     for line in file:
         word = line.strip()

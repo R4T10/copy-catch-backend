@@ -9,7 +9,6 @@ class CourseService:
     @staticmethod
     def get_course_list():
         professor_email = request.form['professor_email']
-        print(request.form)
         data = db.Courses.find({'professor_email': professor_email})
         courses = []
 
@@ -52,7 +51,6 @@ class CourseService:
             'year': year,
             'examination': examination
         })
-        print(added_course)
         if added_course:
             added_course['_id'] = str(added_course['_id'])
         return jsonify(added_course), 200
@@ -74,7 +72,6 @@ class CourseService:
     @staticmethod
     def edit_course():
         id = request.form.get('id')
-        print(request.form['id'])
         id = ObjectId(id)
         course_id = request.form['course_id']
         course_name = request.form['course_name']
