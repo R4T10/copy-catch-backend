@@ -42,7 +42,7 @@ def perform_spell_correction(text):
 class CompareService:
     @staticmethod
     def comparingStudentAnswer():
-        global keep_id, sorted_data_return, new_dict, df_bm
+        global keep_id, sorted_data_return, new_dict, df_bm, comparison_data
         course_id = request.args.get('id')
         course_id = ObjectId(course_id)
         print(course_id)
@@ -91,6 +91,22 @@ class CompareService:
                     print(student_id)
                     print(df_bm['student_name'] + "" + df_bm['answer'])
                     print(df_bm['bm25'])
+
+                    # Calculate percentage for each BM25 score in the answer
+                    max_score = df_bm['bm25'].max()
+                    percentage_scores = (df_bm['bm25'] / max_score) * 100
+                    percentage_scores = round(percentage_scores.apply(lambda x: 0 if x < 50 else x),2)
+                    comparison_data = []
+
+                    for i, entry in enumerate(df_bm['student_name']):
+                        comparison_data.append({
+                            'student_name': entry,
+                            'question_text': df_bm['question'].iloc[i],
+                            'answer': df_bm['answer'].iloc[i],
+                            'student_id': df_bm['student_id'].iloc[i],
+                            'percentage': percentage_scores.iloc[i]
+                        })
+
                     percentage = round((df_bm['bm25'].iloc[1] / df_bm['bm25'].iloc[0]) * 100, 2)
                     if percentage < 50:
                         percentage = 0
@@ -104,8 +120,6 @@ class CompareService:
 
                 if student_name:
                     temp[student_id]['student_name'] = student_name
-                    comparison_data = df_bm[
-                        ['student_name', 'question_text', 'answer', 'student_id', 'question']].to_dict(orient='records')
                     temp[student_id]['answers'].append({
                         'question': question,
                         'answer': answer,
