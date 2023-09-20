@@ -93,7 +93,7 @@ class CompareService:
                     print(df_bm['bm25'])
                     max_score = df_bm['bm25'].max()
                     percentage_scores = (df_bm['bm25'] / max_score) * 100
-                    percentage_scores = round(percentage_scores.apply(lambda x: 0 if x < 10 else x),2)
+                    percentage_scores = round(percentage_scores.apply(lambda x: 0 if x < 10 else x), 2)
                     comparison_data = []
 
                     for i, entry in enumerate(df_bm['student_name']):
@@ -148,7 +148,7 @@ class CompareService:
 
     @staticmethod
     def searchGoogle():
-        global results, df_bm
+        global results, df_bm, comparison_data
         course_id = request.args.get('id')
         course_id = ObjectId(course_id)
         data = db.Question.find({'course_id': course_id})
@@ -187,10 +187,20 @@ class CompareService:
                     result_vectors = vectorizer.transform(df_web['snippet'])
                     scores = cosine_similarity(answer_vector, result_vectors)
                     scores = scores[0]
+
                     df_bm = pd.DataFrame(data=df_web)
                     df_bm['tfidf'] = list(scores)
                     df_bm['rank'] = df_bm['tfidf'].rank(ascending=False)
                     df_bm = df_bm.nlargest(columns='tfidf', n=5)
+                    comparison_data = []
+                    percentage_scores = round((df_bm['tfidf'] * 100), 2)
+                    for i, entry in enumerate(df_bm['snippet']):
+                        comparison_data.append({
+                            'snippet': entry,
+                            'link': df_bm['link'].iloc[i],
+                            'percentage': round(percentage_scores.iloc[i], 2)
+                        })
+
                     percentage = round((df_bm['tfidf'].iloc[0] * 100), 2)
                     print(answer)
                     print(df_bm[['snippet', 'tfidf', 'link']])
@@ -211,7 +221,7 @@ class CompareService:
                 temp[student_id]['answers'].append({
                     'question': question,
                     'answer': answer,
-                    'comparison_data': df_bm[['snippet', 'link']].to_dict(orient='records'),
+                    'comparison_data': comparison_data,
                     'percentage': percentage,
                     'question_text': question_text
                 })
