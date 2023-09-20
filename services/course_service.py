@@ -22,7 +22,7 @@ class CourseService:
                 'professor_email': course['professor_email'],
                 'file': course['file']
             })
-
+        courses = courses[::-1]
         return jsonify(courses), 200
 
     @staticmethod

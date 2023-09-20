@@ -91,11 +91,9 @@ class CompareService:
                     print(student_id)
                     print(df_bm['student_name'] + "" + df_bm['answer'])
                     print(df_bm['bm25'])
-
-                    # Calculate percentage for each BM25 score in the answer
                     max_score = df_bm['bm25'].max()
                     percentage_scores = (df_bm['bm25'] / max_score) * 100
-                    percentage_scores = round(percentage_scores.apply(lambda x: 0 if x < 50 else x),2)
+                    percentage_scores = round(percentage_scores.apply(lambda x: 0 if x < 10 else x),2)
                     comparison_data = []
 
                     for i, entry in enumerate(df_bm['student_name']):

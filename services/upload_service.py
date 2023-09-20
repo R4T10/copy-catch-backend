@@ -25,20 +25,20 @@ class UploadService:
 
     @staticmethod
     def upload():
+        # global question_text_dict_keep
         file = request.files.get('file')
         course_id = request.form['id']
         course_id = ObjectId(course_id)
         file_stream = io.BytesIO(file.stream.read())
-
         try:
             with zipfile.ZipFile(file.stream) as zip_file:
                 pass
         except zipfile.BadZipFile:
             raise TypeError("Invalid file type")
-
+        # question_text_dict_keep = ''
+        question_text_dict = {}
         with zipfile.ZipFile(file_stream, 'r') as zip_file:
             student_ids = set()
-            question_text_dict = {}
             student_list = set()
             for file_name in zip_file.namelist():
                 if '/' in file_name:
@@ -46,13 +46,14 @@ class UploadService:
                     folder_names = folder_names.replace('.', '').replace(' ', '')
                     if folder_names.startswith('Q'):
                         student_id = file_name.split('/')[1].split()[0]
-                        if student_id == 'Question' or 'Question text' in file_name:
+                        if student_id == 'Question':
                             inside_question = zip_file.read(file_name).decode('utf-8')
                             inside_question = inside_question.lower()
-                            question_text = inside_question.strip()
+                            question_text = ' '.join(inside_question.split())
                             question_text_dict[folder_names] = question_text
-                        else:
-                            question_text_dict[folder_names] = ''
+                        # else:
+                        #     question_text_dict[folder_names] = ''
+            print(question_text_dict)
             for file_name in zip_file.namelist():
                 if '/' in file_name:
                     folder_names = file_name.split('/', 1)[0]
@@ -81,7 +82,10 @@ class UploadService:
                                 text_response = text_response.replace("don't", 'do not')
                             text_response = re.sub(r'[^a-zA-Z0-9 ]', ' ', text_response)
                             text_response = perform_spell_correction(text_response)
+                            # print(folder_names)
                             question_text = question_text_dict.get(folder_names, '')
+                            print("QUESTION TEXT")
+                            print(question_text)
                             question = Question(course_id=course_id, question=folder_names, question_text=question_text,
                                                 student_name=student_name,
                                                 student_id=student_id, answer=text_response)
@@ -144,10 +148,9 @@ class UploadService:
                 pass
         except zipfile.BadZipFile:
             raise TypeError("Invalid file type")
-
+        question_text_dict = {}
         with zipfile.ZipFile(file_stream, 'r') as zip_file:
             student_ids = set()
-            question_text_dict = {}
             student_list = set()
             for file_name in zip_file.namelist():
                 if '/' in file_name:
@@ -155,13 +158,14 @@ class UploadService:
                     folder_names = folder_names.replace('.', '').replace(' ', '')
                     if folder_names.startswith('Q'):
                         student_id = file_name.split('/')[1].split()[0]
-                        if student_id == 'Question' or 'Question text' in file_name:
+                        if student_id == 'Question':
                             inside_question = zip_file.read(file_name).decode('utf-8')
                             inside_question = inside_question.lower()
                             question_text = inside_question.strip()
                             question_text_dict[folder_names] = question_text
-                        else:
-                            question_text_dict[folder_names] = ''
+                            print(question_text)
+                        # else:
+                        #     question_text_dict[folder_names] = ''
             for file_name in zip_file.namelist():
                 if '/' in file_name:
                     folder_names = file_name.split('/', 1)[0]
