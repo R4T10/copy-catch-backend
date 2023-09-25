@@ -67,6 +67,9 @@ class CompareService:
         temp = {}
         df_bm_dict = {}
         prev_student_names = {}
+        vectorizer = TfidfVectorizer()
+        corpus = df['answer'].tolist()
+        vectorizer.fit(corpus)
         for question in list_q:
             keep = df[df['question'] == question]
             question_text = keep['question_text'].iloc[0]
@@ -80,19 +83,25 @@ class CompareService:
                 answer = data_for_id['answer'].iloc[0]
                 student_name = data_for_id['student_name'].iloc[0]
                 if answer != 'null':
-                    test = BM25()
-                    test.fit(df_question['answer'])
-                    score = test.transform(answer)
+                    # test = BM25()
+                    # test.fit(df_question['answer'])
+                    # score = test.transform(answer)
                     df_bm = pd.DataFrame(data=df_question)
-                    df_bm['bm25'] = list(score)
-                    df_bm['rank'] = df_bm['bm25'].rank(ascending=False)
-                    df_bm = df_bm.nlargest(columns='bm25', n=4)
+                    # df_bm['bm25'] = list(score)
+                    # df_bm['rank'] = df_bm['bm25'].rank(ascending=False)
+                    answer_vector = vectorizer.transform([answer])
+                    result_vectors = vectorizer.transform(df_question['answer'])
+                    scores = cosine_similarity(answer_vector, result_vectors)
+                    scores = scores[0]
+                    df_bm['tfidf'] = list(scores)
+                    df_bm['rank'] = df_bm['tfidf'].rank(ascending=False)
+                    df_bm = df_bm.nlargest(columns='tfidf', n=4)
                     print(question)
                     print(student_id)
                     print(df_bm['student_name'] + "" + df_bm['answer'])
-                    print(df_bm['bm25'])
-                    max_score = df_bm['bm25'].max()
-                    percentage_scores = (df_bm['bm25'] / max_score) * 100
+                    print(df_bm['tfidf'])
+                    max_score = df_bm['tfidf'].max()
+                    percentage_scores = (df_bm['tfidf'] / max_score) * 100
                     percentage_scores = round(percentage_scores.apply(lambda x: 0 if x < 10 else x), 2)
                     comparison_data = []
 
@@ -105,7 +114,8 @@ class CompareService:
                             'percentage': percentage_scores.iloc[i]
                         })
 
-                    percentage = round((df_bm['bm25'].iloc[1] / df_bm['bm25'].iloc[0]) * 100, 2)
+                    # percentage = round((df_bm['bm25'].iloc[1] / df_bm['bm25'].iloc[0]) * 100, 2)
+                    percentage = round((df_bm['tfidf'].iloc[1] / df_bm['tfidf'].iloc[0]) * 100, 2)
                     if percentage < 50:
                         percentage = 0
                     print(percentage)
