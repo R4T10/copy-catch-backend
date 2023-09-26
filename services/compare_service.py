@@ -43,63 +43,72 @@ class CompareService:
     @staticmethod
     def comparingStudentAnswer():
         global keep_id, sorted_data_return, new_dict, df_bm, comparison_data
+        # Request the course id from frontend
         course_id = request.args.get('id')
+        # Transform it to be Object ID
         course_id = ObjectId(course_id)
-        print(course_id)
+        # Using Object ID to search the data regarding that course
         data = db.Question.find({'course_id': course_id})
+        # Create the data frame and using the data that we get from the database
         df = pd.DataFrame(data, columns=['_id', 'course_id', 'question', 'question_text', 'student_id', 'student_name',
                                          'answer'])
-        courses = []
-        for course in data:
-            courses.append({
-                'course_id': course['course_id'],
-                'question': course['question'],
-                'student_id': course['student_id'],
-                'student_name': course['student_name'],
-                'answer': course['answer']
-            })
-        print(courses)
-
-        data_list = list(data)
+        # Store the list of question list from data frame here
         question = df['question']
+        # Transform the data we have to be set and to be list because what we get is still in data frame format
         list_q = list(set(question))
+
+        # Sort the question number from the number after text "Q"
         list_q = sorted(list_q, key=lambda x: int(x.split('-')[0][1:]))
         temp = {}
         df_bm_dict = {}
         prev_student_names = {}
+        # Getting Tf-idf method from lib
         vectorizer = TfidfVectorizer()
+        # Get the data from data frame then make it to be list be for
         corpus = df['answer'].tolist()
+        # Transform the data into TfidfVectorizer which also calculate the term frequencies (Tf) and inverse document frequencies (idf)
         vectorizer.fit(corpus)
+        # Read the question number in list
         for question in list_q:
+            # Match the data and get it from the data frame
             keep = df[df['question'] == question]
+            # Get the question text related to the question number
             question_text = keep['question_text'].iloc[0]
             print(question_text)
+            # Create the data frame using the data that we get from matching by using question number
             df_question = pd.DataFrame(data=keep)
             print(df_question)
+            # Store the list of student id from data frame here
             keep_id = keep['student_id']
+            # Sort the student id from the first 2 number and last 2 number
             keep_id = sorted(keep_id, key=lambda x: x[:2] + x[2:])
+            # Read student id in list
             for student_id in keep_id:
+                # Match the data from the student id
                 data_for_id = df_question[df_question['student_id'] == student_id]
+                # Get answer from that student id to be base for using to comparing
                 answer = data_for_id['answer'].iloc[0]
+                # Get the student name from that student id
                 student_name = data_for_id['student_name'].iloc[0]
+                # Check that in that question number this student have the answer or not
                 if answer != 'null':
-                    # test = BM25()
-                    # test.fit(df_question['answer'])
-                    # score = test.transform(answer)
+                    # Create the data frame using the data that we get from matching by using question number
                     df_bm = pd.DataFrame(data=df_question)
-                    # df_bm['bm25'] = list(score)
-                    # df_bm['rank'] = df_bm['bm25'].rank(ascending=False)
+                    # Transform the answer into TfidfVectorizer which transform method will make it into number
                     answer_vector = vectorizer.transform([answer])
+                    # Transform the list of answer into TfidfVectorizer which transform method will make it into number which mean this value will have list of number
                     result_vectors = vectorizer.transform(df_question['answer'])
+                    # Use cosine method to determine how similar two documents are based on their term frequencies.
                     scores = cosine_similarity(answer_vector, result_vectors)
+                    # Get list of the score
                     scores = scores[0]
+                    # Store in to new column call tfidf
                     df_bm['tfidf'] = list(scores)
+                    # Rank the data from tfidf column from the highest number to lowest
                     df_bm['rank'] = df_bm['tfidf'].rank(ascending=False)
+                    # Showing the data only 4 data
                     df_bm = df_bm.nlargest(columns='tfidf', n=4)
-                    print(question)
-                    print(student_id)
-                    print(df_bm['student_name'] + "" + df_bm['answer'])
-                    print(df_bm['tfidf'])
+                    # Find the highest number from tfidf column
                     max_score = df_bm['tfidf'].max()
                     percentage_scores = (df_bm['tfidf'] / max_score) * 100
                     percentage_scores = round(percentage_scores.apply(lambda x: 0 if x < 10 else x), 2)
@@ -114,8 +123,9 @@ class CompareService:
                             'percentage': percentage_scores.iloc[i]
                         })
 
-                    # percentage = round((df_bm['bm25'].iloc[1] / df_bm['bm25'].iloc[0]) * 100, 2)
+                    # Calculate the highest percentage of similarity by using the first number and second number
                     percentage = round((df_bm['tfidf'].iloc[1] / df_bm['tfidf'].iloc[0]) * 100, 2)
+                    # Check if the percentage is higher than 50
                     if percentage < 50:
                         percentage = 0
                     print(percentage)
