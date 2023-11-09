@@ -184,6 +184,7 @@ navigation
 network
 node
 node.js
+npm
 js
 null
 object
@@ -274,3 +275,4 @@ YAML
 yield
 zip
 yml
+katalon
